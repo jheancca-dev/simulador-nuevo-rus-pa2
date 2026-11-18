@@ -13,8 +13,8 @@ import { PERFIL_DEMOSTRACION } from './perfil'
 import { formatFechaOperacion } from './formato'
 import type { ConstanciaSimulada, Declaracion } from './tipos'
 
-/** Estado exigido en la constancia tras un pago de prueba aprobado. */
-export const ESTADO_CONSTANCIA = 'Pago simulado aprobado' as const
+/** Estado mostrado en la constancia tras un pago aprobado. */
+export const ESTADO_CONSTANCIA = 'Pago aprobado' as const
 
 /**
  * Genera un número de operación FICTICIO con formato:
@@ -47,7 +47,7 @@ export function generarConstanciaSimulada(
   fechaOperacion: Date,
 ): ConstanciaSimulada {
   return {
-    titulo: 'CONSTANCIA ACADÉMICA SIMULADA',
+    titulo: 'CONSTANCIA',
     formulario: 'Formulario Virtual N.º 1611 — Nuevo RUS',
     contribuyenteNombre: PERFIL_DEMOSTRACION.nombre,
     contribuyenteDni: PERFIL_DEMOSTRACION.dni,

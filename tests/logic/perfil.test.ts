@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { NOTA_DATOS_FICTICIOS, PERFIL_DEMOSTRACION } from '@/lib/rus/perfil'
+import { AVISO_DESCARGO, PERFIL_DEMOSTRACION } from '@/lib/rus/perfil'
 import { generarConstanciaSimulada } from '@/lib/rus/constancia'
 import {
   MENSAJE_OPERACION_CANCELADA,
@@ -10,8 +10,8 @@ import { formatEstadoDeclaracion } from '@/lib/rus/formato'
 import type { Declaracion } from '@/lib/rus/tipos'
 
 /**
- * Pruebas del perfil de demostración (contribuyente ficticio único), de los
- * estados diferenciados del pago simulado y de las notificaciones exigidas.
+ * Pruebas del perfil del contribuyente (datos precargados únicos), de los
+ * estados diferenciados del pago y de las notificaciones exigidas.
  */
 
 const FECHA_FIJA = new Date(2025, 0, 15, 9, 30, 45) // 15/01/2025 09:30:45 (hora local)
@@ -32,14 +32,14 @@ function crearDeclaracionEnBandeja(secuencia = 1): Declaracion {
   return resultado.declaracion
 }
 
-describe('Perfil de demostración: contribuyente ficticio precargado', () => {
+describe('Perfil del contribuyente: datos precargados', () => {
   it('Contiene exactamente el nombre, DNI, RUC, régimen y tipo de cuenta exigidos', () => {
     expect(PERFIL_DEMOSTRACION).toEqual({
       nombre: 'Pepe Lucho Pérez',
       dni: '00000000',
       ruc: '00000000000',
       regimen: 'Nuevo RUS',
-      tipoCuenta: 'Contribuyente ficticio de pruebas',
+      tipoCuenta: 'Contribuyente del Nuevo RUS',
     })
   })
 
@@ -48,25 +48,26 @@ describe('Perfil de demostración: contribuyente ficticio precargado', () => {
     expect(PERFIL_DEMOSTRACION.ruc).toMatch(/^0{11}$/)
   })
 
-  it('La nota aclara que los datos no se consultan ni validan contra SUNAT', () => {
-    expect(NOTA_DATOS_FICTICIOS).toContain('no válidos')
-    expect(NOTA_DATOS_FICTICIOS).toContain('SUNAT')
+  it('El aviso general aclara que no es una aplicación oficial de SUNAT', () => {
+    expect(AVISO_DESCARGO).toContain('no es una aplicación oficial')
+    expect(AVISO_DESCARGO).toContain('SUNAT')
+    expect(AVISO_DESCARGO).toContain('no realiza declaraciones ni pagos reales')
   })
 })
 
-describe('La constancia incluye los datos del contribuyente ficticio', () => {
-  it('Constancia con nombre, DNI y RUC de demostración (caso 11 ampliado)', () => {
+describe('La constancia incluye los datos del contribuyente', () => {
+  it('Constancia con nombre, DNI y RUC del contribuyente (caso 11 ampliado)', () => {
     const declaracion = crearDeclaracionEnBandeja(1)
     const aprobado = procesarPagoSimulado(declaracion, 'aprobado', FECHA_FIJA, 1)
 
     expect(aprobado.constancia).not.toBeNull()
     expect(aprobado.constancia).toMatchObject({
-      titulo: 'CONSTANCIA ACADÉMICA SIMULADA',
+      titulo: 'CONSTANCIA',
       formulario: 'Formulario Virtual N.º 1611 — Nuevo RUS',
       contribuyenteNombre: 'Pepe Lucho Pérez',
       contribuyenteDni: '00000000',
       contribuyenteRuc: '00000000000',
-      estado: 'Pago simulado aprobado',
+      estado: 'Pago aprobado',
     })
   })
 
@@ -80,8 +81,8 @@ describe('La constancia incluye los datos del contribuyente ficticio', () => {
   })
 })
 
-describe('Estados diferenciados del pago simulado', () => {
-  it('El rechazo marca «Pago simulado rechazado» y NUNCA genera constancia (caso 10 ampliado)', () => {
+describe('Estados diferenciados del pago', () => {
+  it('El rechazo marca «Pago rechazado» y NUNCA genera constancia (caso 10 ampliado)', () => {
     const declaracion = crearDeclaracionEnBandeja(1)
     const rechazado = procesarPagoSimulado(declaracion, 'rechazado', FECHA_FIJA, 1)
 
@@ -107,8 +108,8 @@ describe('Estados diferenciados del pago simulado', () => {
 
   it('formatEstadoDeclaracion etiqueta los tres estados diferenciados', () => {
     expect(formatEstadoDeclaracion('agregada_bandeja')).toBe('Agregado a bandeja')
-    expect(formatEstadoDeclaracion('pago_rechazado')).toBe('Pago simulado rechazado')
-    expect(formatEstadoDeclaracion('pago_aprobado')).toBe('Pago simulado aprobado')
+    expect(formatEstadoDeclaracion('pago_rechazado')).toBe('Pago rechazado')
+    expect(formatEstadoDeclaracion('pago_aprobado')).toBe('Pago aprobado')
   })
 
   it('Un período duplicado sigue bloqueado aunque la bandeja tenga un rechazado', () => {

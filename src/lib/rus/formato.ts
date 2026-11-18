@@ -32,7 +32,7 @@ export function formatCategoria(categoria: 1 | 2): string {
 export function formatEstadoDeclaracion(
   estado: 'agregada_bandeja' | 'pago_rechazado' | 'pago_aprobado',
 ): string {
-  if (estado === 'pago_aprobado') return 'Pago simulado aprobado'
-  if (estado === 'pago_rechazado') return 'Pago simulado rechazado'
+  if (estado === 'pago_aprobado') return 'Pago aprobado'
+  if (estado === 'pago_rechazado') return 'Pago rechazado'
   return 'Agregado a bandeja'
 }

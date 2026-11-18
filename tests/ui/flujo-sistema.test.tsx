@@ -41,33 +41,35 @@ async function avanzarHastaBandeja(usuario: ReturnType<typeof userEvent.setup>) 
   await screen.findByText(/bandeja de declaraciones/i)
 }
 
-/** Llega a la pantalla de pago de prueba (tras confirmar Sí). */
+/** Llega a la pantalla de pago (tras confirmar Sí). */
 async function avanzarHastaPago(usuario: ReturnType<typeof userEvent.setup>) {
   await avanzarHastaBandeja(usuario)
   await usuario.click(screen.getByRole('button', { name: /presentar\/pagar/i }))
   await usuario.click(await screen.findByRole('button', { name: 'Sí' }))
-  await screen.findByText(/completamente ficticio/i)
+  await screen.findByText(/método de pago/i)
 }
 
 describe('Cabecera: contribuyente ficticio y contador de bandeja', () => {
-  it('muestra la bienvenida del perfil de demostración y el contador discreto', () => {
+  it('muestra la bienvenida del contribuyente, el aviso general y el contador discreto', () => {
     render(<SimuladorRus />)
 
-    expect(screen.getByText(/bienvenida, pepe lucho pérez/i)).toBeInTheDocument()
+    expect(screen.getByText(/bienvenido, pepe lucho pérez/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/aviso: esta no es una aplicación oficial de sunat/i),
+    ).toBeInTheDocument()
     expect(screen.getByText('Bandeja (0)')).toBeInTheDocument()
   })
 
-  it('el «Perfil de demostración» muestra el nombre, el DNI y el RUC ficticios', async () => {
+  it('el «Perfil» muestra el nombre, el DNI y el RUC del contribuyente', async () => {
     const usuario = userEvent.setup()
     render(<SimuladorRus />)
 
-    await usuario.click(screen.getByRole('button', { name: /perfil de demostración/i }))
+    await usuario.click(screen.getByRole('button', { name: /perfil/i }))
     const dialogo = await screen.findByRole('dialog')
     expect(within(dialogo).getByText('Pepe Lucho Pérez')).toBeInTheDocument()
     expect(within(dialogo).getByText('00000000')).toBeInTheDocument()
     expect(within(dialogo).getByText('00000000000')).toBeInTheDocument()
-    expect(within(dialogo).getByText('Contribuyente ficticio de pruebas')).toBeInTheDocument()
-    expect(within(dialogo).getByText(/marcadores deliberadamente no válidos/i)).toBeInTheDocument()
+    expect(within(dialogo).getByText('Contribuyente del Nuevo RUS')).toBeInTheDocument()
 
     // Cierre correcto del diálogo.
     await usuario.click(within(dialogo).getByRole('button', { name: 'Cerrar' }))
@@ -91,7 +93,7 @@ describe('Flujo completo del simulador (nivel sistema)', () => {
     const usuario = userEvent.setup()
     render(<SimuladorRus />)
 
-    expect(screen.getByText(/seleccione el trámite a simular/i)).toBeInTheDocument()
+    expect(screen.getByText(/seleccione el trámite/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /continuar a la etapa/i })).toBeEnabled()
   })
 
@@ -170,7 +172,7 @@ describe('Flujo completo del simulador (nivel sistema)', () => {
       within(seccion).getByText(/cuota mensual calculada automáticamente/i),
     ).toBeInTheDocument()
     expect(
-      within(seccion).getByText(/valor fijo s\/ 0 en el escenario ordinario académico/i),
+      within(seccion).getByText(/valor fijo s\/ 0 en el escenario ordinario sin intereses/i),
     ).toBeInTheDocument()
     expect(
       within(seccion).getByText(/funcionalidad no implementada: no se calcula ni se aplica/i),
@@ -189,7 +191,7 @@ describe('Flujo completo del simulador (nivel sistema)', () => {
     await usuario.type(screen.getByLabelText(/adquisiciones o compras/i), '1000')
 
     expect(
-      await screen.findByText(/fuera del flujo ordinario simulado/i),
+      await screen.findByText(/fuera del flujo ordinario/i),
     ).toBeInTheDocument()
 
     await usuario.click(screen.getByRole('button', { name: /agregar a bandeja/i }))
@@ -304,46 +306,46 @@ describe('Flujo completo del simulador (nivel sistema)', () => {
 
     await usuario.click(screen.getByRole('button', { name: 'Sí' }))
 
-    // Pantalla de pago ficticia (título y método comparten texto, usamos el título).
-    expect(await screen.findByText(/completamente ficticio/i)).toBeInTheDocument()
-    expect(screen.getAllByText(/pago de prueba/i).length).toBeGreaterThanOrEqual(1)
+    // Pantalla de pago (alerta «Método de pago» y título «Pago»).
+    expect(await screen.findByText(/método de pago/i)).toBeInTheDocument()
+    expect(screen.getAllByText(/^Pago$/).length).toBeGreaterThanOrEqual(1)
     expect(screen.getAllByText('S/ 20.00').length).toBeGreaterThanOrEqual(2)
 
-    // Simular rechazo: mensajes diferenciados (título y estado).
-    await usuario.click(screen.getByRole('button', { name: /simular pago rechazado/i }))
+    // Rechazo: mensajes diferenciados (título y estado).
+    await usuario.click(screen.getByRole('button', { name: /rechazar pago/i }))
     expect(
-      (await screen.findAllByText(/pago simulado rechazado/i)).length,
+      (await screen.findAllByText(/pago rechazado/i)).length,
     ).toBeGreaterThanOrEqual(1)
 
     // No debe existir constancia en ninguna parte del documento.
-    expect(screen.queryByText(/constancia académica simulada/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/constancia disponible/i)).not.toBeInTheDocument()
     const estadoActual = screen.getByText(/estado actual de la declaración/i)
-    expect(estadoActual).toHaveTextContent('Pago simulado rechazado')
+    expect(estadoActual).toHaveTextContent('Pago rechazado')
   })
 
-  it('tras un rechazo la bandeja marca «Pago simulado rechazado», sin constancia, y el reintento aprobado sí la genera', async () => {
+  it('tras un rechazo la bandeja marca «Pago rechazado», sin constancia, y el reintento aprobado sí la genera', async () => {
     const usuario = userEvent.setup()
     render(<SimuladorRus />)
     await avanzarHastaPago(usuario)
 
-    await usuario.click(screen.getByRole('button', { name: /simular pago rechazado/i }))
+    await usuario.click(screen.getByRole('button', { name: /rechazar pago/i }))
     // Cancelar la operación del pago rechazado regresa a la bandeja.
     await usuario.click(screen.getByRole('button', { name: /cancelar operación/i }))
 
     expect(
       await screen.findByText(/operación cancelada: la declaración se conserva/i),
     ).toBeInTheDocument()
-    expect(screen.getByText('Pago simulado rechazado')).toBeInTheDocument()
-    expect(screen.queryByText(/constancia académica simulada/i)).not.toBeInTheDocument()
+    expect(screen.getByText('Pago rechazado')).toBeInTheDocument()
+    expect(screen.queryByText(/constancia disponible/i)).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /ver constancia/i })).not.toBeInTheDocument()
 
     // Reintento: la declaración rechazada admite presentar/pagar nuevamente.
     await usuario.click(screen.getByRole('button', { name: /presentar\/pagar/i }))
     await usuario.click(await screen.findByRole('button', { name: 'Sí' }))
-    await usuario.click(await screen.findByRole('button', { name: /simular pago aprobado/i }))
-    await usuario.click(await screen.findByRole('button', { name: /generar constancia simulada/i }))
+    await usuario.click(await screen.findByRole('button', { name: /^pagar$/i }))
+    await usuario.click(await screen.findByRole('button', { name: /generar constancia/i }))
 
-    expect(await screen.findByText('CONSTANCIA ACADÉMICA SIMULADA')).toBeInTheDocument()
+    expect(await screen.findByText('CONSTANCIA')).toBeInTheDocument()
   })
 
   it('Caso 11 (UI): pago aprobado registra el estado y genera la constancia con el contribuyente', async () => {
@@ -352,15 +354,15 @@ describe('Flujo completo del simulador (nivel sistema)', () => {
     await avanzarHastaPago(usuario)
 
     // Pago aprobado: mensaje diferenciado de aprobación.
-    await usuario.click(await screen.findByRole('button', { name: /simular pago aprobado/i }))
+    await usuario.click(await screen.findByRole('button', { name: /^pagar$/i }))
     expect(
-      (await screen.findAllByText(/pago simulado aprobado/i)).length,
+      (await screen.findAllByText(/pago aprobado/i)).length,
     ).toBeGreaterThanOrEqual(1)
 
     // Generar la constancia.
-    await usuario.click(screen.getByRole('button', { name: /generar constancia simulada/i }))
+    await usuario.click(screen.getByRole('button', { name: /generar constancia/i }))
 
-    expect(await screen.findByText('CONSTANCIA ACADÉMICA SIMULADA')).toBeInTheDocument()
+    expect(await screen.findByText('CONSTANCIA')).toBeInTheDocument()
     // El formulario aparece en la cabecera de la página y en la constancia.
     expect(
       screen.getAllByText('Formulario Virtual N.º 1611 — Nuevo RUS').length,
@@ -373,14 +375,14 @@ describe('Flujo completo del simulador (nivel sistema)', () => {
     expect(screen.getByText('S/ 1 825.00')).toBeInTheDocument()
     expect(screen.getByText(/SIM-1611-\d{8}-\d{4}/)).toBeInTheDocument()
     // El estado aparece una vez: fila «Estado» de la constancia.
-    expect(screen.getAllByText('Pago simulado aprobado').length).toBe(1)
+    expect(screen.getAllByText('Pago aprobado').length).toBe(1)
     expect(screen.getByRole('button', { name: /imprimir/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /guardar constancia/i })).toBeInTheDocument()
 
     // Volver a la bandeja: la declaración ahora está pagada.
     await usuario.click(screen.getByRole('button', { name: /volver a la bandeja/i }))
     expect(await screen.findByText(/bandeja de declaraciones/i)).toBeInTheDocument()
-    expect(screen.getAllByText('Pago simulado aprobado').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText('Pago aprobado').length).toBeGreaterThanOrEqual(1)
     expect(screen.getByRole('button', { name: /ver constancia/i })).toBeInTheDocument()
   })
 
@@ -397,7 +399,7 @@ describe('Flujo completo del simulador (nivel sistema)', () => {
     expect(screen.getByText('03/2025')).toBeInTheDocument()
     expect(screen.getByText('Agregado a bandeja')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /presentar\/pagar/i })).toBeInTheDocument()
-    expect(screen.queryByText(/constancia académica simulada/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/constancia disponible/i)).not.toBeInTheDocument()
 
     // La notificación de cancelación es descartable.
     await usuario.click(
@@ -432,6 +434,6 @@ describe('Flujo completo del simulador (nivel sistema)', () => {
     await usuario.click(
       within(navegacion).getByRole('button', { name: /ir a la etapa 1/i }),
     )
-    expect(screen.getByText(/seleccione el trámite a simular/i)).toBeInTheDocument()
+    expect(screen.getByText(/seleccione el trámite/i)).toBeInTheDocument()
   })
 })

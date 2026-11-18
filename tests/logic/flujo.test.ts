@@ -143,7 +143,7 @@ describe('Caso 11: constancia generada tras un pago aprobado', () => {
     expect(resultado.constancia).not.toBeNull()
     const constancia = resultado.constancia!
 
-    expect(constancia.titulo).toBe('CONSTANCIA ACADÉMICA SIMULADA')
+    expect(constancia.titulo).toBe('CONSTANCIA')
     expect(constancia.formulario).toBe('Formulario Virtual N.º 1611 — Nuevo RUS')
     expect(constancia.periodo).toBe('03/2025')
     expect(constancia.ingresos).toBe(1325)
@@ -154,7 +154,7 @@ describe('Caso 11: constancia generada tras un pago aprobado', () => {
     expect(constancia.importePagado).toBe(20)
     expect(constancia.fechaOperacion).toBe('15/01/2025 09:30:45')
     expect(constancia.numeroOperacion).toBe('SIM-1611-20250115-0001')
-    expect(constancia.estado).toBe('Pago simulado aprobado')
+    expect(constancia.estado).toBe('Pago aprobado')
   })
 
   it('La categoría 2 produce una constancia con cuota S/ 50', () => {

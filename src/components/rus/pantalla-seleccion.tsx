@@ -6,7 +6,7 @@
  * como no disponibles para dejar claro el alcance académico del prototipo.
  */
 
-import { FileText, Lock, ShieldAlert } from 'lucide-react'
+import { FileText, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -23,7 +23,7 @@ import { Badge } from '@/components/ui/badge'
 const TRAMITES_NO_DISPONIBLES = [
   {
     titulo: 'Declaración rectificatoria del Formulario 1611',
-    descripcion: 'Fuera del alcance de la versión inicial del simulador.',
+    descripcion: 'Fuera del alcance de esta versión.',
   },
   {
     titulo: 'Categoría especial del Nuevo RUS',
@@ -31,7 +31,7 @@ const TRAMITES_NO_DISPONIBLES = [
   },
   {
     titulo: 'Otros formularios y trámites de SUNAT',
-    descripcion: 'El simulador se concentra en un único proceso educativo.',
+    descripcion: 'Solo está disponible la declaración mensual del Nuevo RUS.',
   },
 ] as const
 
@@ -43,11 +43,11 @@ export function PantallaSeleccion({ onContinuar }: PantallaSeleccionProps) {
   return (
     <Card className="border-slate-200 shadow-sm">
       <CardHeader>
-        <CardTitle className="text-lg sm:text-xl">Seleccione el trámite a simular</CardTitle>
+        <CardTitle className="text-lg sm:text-xl">Seleccione el trámite</CardTitle>
         <CardDescription>
-          Este simulador incluye únicamente la declaración mensual del Nuevo Régimen Único
-          Simplificado (Nuevo RUS) mediante el Formulario Virtual N.º 1611. No confundir con el
-          Régimen Especial de Renta (RER).
+          Incluye únicamente la declaración mensual del Nuevo Régimen Único Simplificado (Nuevo
+          RUS) mediante el Formulario Virtual N.º 1611. No confundir con el Régimen Especial de
+          Renta (RER).
         </CardDescription>
       </CardHeader>
 
@@ -94,12 +94,6 @@ export function PantallaSeleccion({ onContinuar }: PantallaSeleccionProps) {
             </div>
           ))}
         </div>
-
-        <p className="flex items-start gap-2 rounded-md bg-slate-100 p-3 text-xs text-slate-600">
-          <ShieldAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-          Recuerde: se trata de una simulación académica. No se conecta a sistemas de SUNAT ni
-          registra operaciones reales.
-        </p>
       </CardContent>
 
       <CardFooter className="flex justify-end">

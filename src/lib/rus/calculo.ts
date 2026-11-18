@@ -72,7 +72,7 @@ export function calcularCategoriaYCuota(ingresos: number, compras: number): Resu
     return {
       estado: 'fuera_de_rango',
       motivo:
-        'Los ingresos o las compras superan S/ 8 000.00. La declaración no corresponde al flujo ordinario del Nuevo RUS simulado (Categorías 1 y 2).',
+        'Los ingresos o las compras superan S/ 8 000.00. La declaración no corresponde al flujo ordinario del Nuevo RUS (Categorías 1 y 2).',
     }
   }
 

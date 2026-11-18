@@ -13,21 +13,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Simulador Académico — Formulario Virtual N.º 1611 (Nuevo RUS)",
+  title: "Formulario Virtual N.º 1611 — Nuevo RUS",
   description:
-    "Prototipo educativo del curso Pruebas y Calidad de Software: simula la declaración mensual del Nuevo Régimen Único Simplificado (Nuevo RUS) mediante el Formulario Virtual N.º 1611. No es una aplicación oficial de SUNAT; no realiza declaraciones ni pagos reales.",
+    "Declaración mensual del Nuevo Régimen Único Simplificado (Nuevo RUS) mediante el Formulario Virtual N.º 1611. Esta no es una aplicación oficial de SUNAT y no realiza declaraciones ni pagos reales.",
   keywords: [
-    "simulador académico",
-    "Nuevo RUS",
     "Formulario 1611",
+    "Nuevo RUS",
+    "declaración mensual",
     "proyecto universitario",
     "pruebas de software",
   ],
   authors: [{ name: "Proyecto universitario — Pruebas y Calidad de Software" }],
   openGraph: {
-    title: "Simulador Académico — Formulario Virtual N.º 1611 (Nuevo RUS)",
+    title: "Formulario Virtual N.º 1611 — Nuevo RUS",
     description:
-      "Prototipo educativo que simula la declaración mensual del Nuevo RUS. No es una aplicación oficial de SUNAT.",
+      "Declaración mensual del Nuevo RUS mediante el Formulario Virtual N.º 1611. No es una aplicación oficial de SUNAT.",
     type: "website",
   },
 };

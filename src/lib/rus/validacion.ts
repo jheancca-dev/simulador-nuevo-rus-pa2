@@ -158,7 +158,7 @@ export function validarEntradaDeclaracion(entrada: {
 
   if (entrada.rectificatoria) {
     errores.rectificatoria =
-      'La declaración rectificatoria está fuera del alcance de esta versión del simulador. Solo se procesan declaraciones ordinarias.'
+      'La declaración rectificatoria está fuera del alcance de esta versión. Solo se procesan declaraciones ordinarias.'
   }
 
   const ingresos = leerMonto(entrada.ingresosTexto)

@@ -7,7 +7,7 @@
  * - Casillas de solo lectura, cada una con tratamiento explícito:
  *     · 400: categoría calculada automáticamente.
  *     · 503: cuota mensual calculada automáticamente.
- *     · 504: valor fijo S/ 0 (escenario ordinario académico sin intereses).
+ *     · 504: valor fijo S/ 0 (escenario ordinario sin intereses).
  *     · 505: importe calculado automáticamente.
  *     · 509: funcionalidad NO implementada (no se calcula ni se aplica
  *       compensación) en esta versión.
@@ -327,7 +327,7 @@ export function FormularioDeclaracion({
           </RadioGroup>
           {formulario.rectificatoria ? (
             <p role="alert" className="text-xs font-medium text-amber-700">
-              La declaración rectificatoria está fuera del alcance de esta versión del simulador.
+              La declaración rectificatoria está fuera del alcance de esta versión.
               Seleccione «No» para poder continuar.
             </p>
           ) : null}
@@ -389,7 +389,7 @@ export function FormularioDeclaracion({
         {fueraDeRango ? (
           <Alert className="border-red-300 bg-red-50 text-red-900">
             <Ban className="size-4" />
-            <AlertTitle>Declaración fuera del flujo ordinario simulado</AlertTitle>
+            <AlertTitle>Declaración fuera del flujo ordinario</AlertTitle>
             <AlertDescription>{fueraDeRango.motivo}</AlertDescription>
           </Alert>
         ) : null}
@@ -434,7 +434,7 @@ export function FormularioDeclaracion({
             etiqueta="Interés moratorio"
             casilla="504"
             valor={formatSoles(0)}
-            nota="Valor fijo S/ 0 en el escenario ordinario académico sin intereses."
+            nota="Valor fijo S/ 0 en el escenario ordinario sin intereses."
           />
           <CampoCalculado
             etiqueta="Compensación de percepciones del IGV"

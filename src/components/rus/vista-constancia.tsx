@@ -1,11 +1,12 @@
 'use client'
 
 /**
- * Etapa 4 «Constancia»: documento académico simulado.
+ * Etapa 4 «Constancia»: documento generado tras un pago aprobado.
  *
- * Se muestra únicamente tras un pago de prueba APROBADO. Incluye un encabezado
- * con el título exigido y una nota visible que impide confundirlo con un
- * comprobante tributario auténtico. El número de operación es ficticio (SIM-).
+ * Se muestra únicamente tras un pago APROBADO. Incluye un encabezado con el
+ * título y una nota en el documento descargable que impide confundirlo con
+ * un comprobante tributario auténtico. El número de operación usa el
+ * prefijo SIM-.
  */
 
 import { Download, Printer } from 'lucide-react'
@@ -32,12 +33,12 @@ interface FilaConstancia {
   esBadgeEstado?: boolean
 }
 
-/** Genera el contenido HTML descargable de la constancia (solo texto académico). */
+/** Genera el contenido HTML descargable de la constancia. */
 function construirHtmlDescargable(constancia: ConstanciaSimulada): string {
   const filas: Array<[string, string]> = [
-    ['Contribuyente (dato de demostración)', constancia.contribuyenteNombre],
-    ['DNI de demostración', constancia.contribuyenteDni],
-    ['RUC de demostración', constancia.contribuyenteRuc],
+    ['Contribuyente', constancia.contribuyenteNombre],
+    ['DNI', constancia.contribuyenteDni],
+    ['RUC', constancia.contribuyenteRuc],
     ['Formulario', constancia.formulario],
     ['Período tributario', constancia.periodo],
     ['Total de ingresos brutos (casilla 507)', formatSoles(constancia.ingresos)],
@@ -45,9 +46,9 @@ function construirHtmlDescargable(constancia: ConstanciaSimulada): string {
     ['Categoría (casilla 400)', formatCategoria(constancia.categoria)],
     ['Cuota mensual (casilla 503)', formatSoles(constancia.cuotaMensual)],
     ['Interés moratorio (casilla 504)', formatSoles(constancia.interesMoratorio)],
-    ['Importe pagado ficticiamente (casilla 505)', formatSoles(constancia.importePagado)],
-    ['Fecha de la operación simulada', constancia.fechaOperacion],
-    ['Número de operación (ficticio)', constancia.numeroOperacion],
+    ['Importe pagado (casilla 505)', formatSoles(constancia.importePagado)],
+    ['Fecha de la operación', constancia.fechaOperacion],
+    ['Número de operación', constancia.numeroOperacion],
     ['Estado', constancia.estado],
   ]
 
@@ -69,8 +70,8 @@ function construirHtmlDescargable(constancia: ConstanciaSimulada): string {
     </div>
     <table style="border-collapse:collapse;width:100%;font-size:14px;">${filasHtml}</table>
     <p style="padding:12px 16px;font-size:11px;color:#64748b;margin:0;">
-      Documento académico simulado con fines educativos. No es un comprobante tributario
-      auténtico ni acredita operación alguna ante SUNAT.
+      Este documento no es un comprobante tributario auténtico ni acredita operación
+      alguna ante SUNAT.
     </p>
   </div>
 </body>
@@ -88,7 +89,7 @@ export function VistaConstancia({
     const url = URL.createObjectURL(blob)
     const enlace = document.createElement('a')
     enlace.href = url
-    enlace.download = `constancia-simulada-${constancia.numeroOperacion}.html`
+    enlace.download = `constancia-${constancia.numeroOperacion}.html`
     document.body.appendChild(enlace)
     enlace.click()
     document.body.removeChild(enlace)
@@ -97,12 +98,12 @@ export function VistaConstancia({
 
   const filas: FilaConstancia[] = [
     {
-      etiqueta: 'Contribuyente (dato de demostración)',
+      etiqueta: 'Contribuyente',
       valor: constancia.contribuyenteNombre,
       completo: true,
     },
-    { etiqueta: 'DNI de demostración', valor: constancia.contribuyenteDni },
-    { etiqueta: 'RUC de demostración', valor: constancia.contribuyenteRuc },
+    { etiqueta: 'DNI', valor: constancia.contribuyenteDni },
+    { etiqueta: 'RUC', valor: constancia.contribuyenteRuc },
     { etiqueta: 'Período tributario', valor: constancia.periodo, completo: true },
     {
       etiqueta: 'Total de ingresos brutos (casilla 507)',
@@ -116,13 +117,13 @@ export function VistaConstancia({
     { etiqueta: 'Cuota mensual (casilla 503)', valor: formatSoles(constancia.cuotaMensual) },
     { etiqueta: 'Interés moratorio (casilla 504)', valor: formatSoles(constancia.interesMoratorio) },
     {
-      etiqueta: 'Importe pagado ficticiamente (casilla 505)',
+      etiqueta: 'Importe pagado (casilla 505)',
       valor: formatSoles(constancia.importePagado),
       completo: true,
       destacado: true,
     },
-    { etiqueta: 'Fecha de la operación simulada', valor: constancia.fechaOperacion },
-    { etiqueta: 'Número de operación (ficticio)', valor: constancia.numeroOperacion, mono: true },
+    { etiqueta: 'Fecha de la operación', valor: constancia.fechaOperacion },
+    { etiqueta: 'Número de operación', valor: constancia.numeroOperacion, mono: true },
     { etiqueta: 'Estado', valor: constancia.estado, completo: true, esBadgeEstado: true },
   ]
 
@@ -131,8 +132,8 @@ export function VistaConstancia({
       <Alert className="no-print border-emerald-300 bg-emerald-50 text-emerald-900">
         <AlertTitle>Constancia disponible</AlertTitle>
         <AlertDescription>
-          Su pago de prueba fue registrado con estado «Pago simulado aprobado». Puede imprimir o
-          guardar esta constancia académica simulada.
+          Su pago fue registrado con estado «Pago aprobado». Puede imprimir o guardar esta
+          constancia.
         </AlertDescription>
       </Alert>
 
@@ -178,11 +179,6 @@ export function VistaConstancia({
               </div>
             ))}
           </dl>
-
-          <p className="mt-4 text-center text-[11px] text-slate-500">
-            Documento académico simulado con fines educativos. No es un comprobante tributario
-            auténtico y no acredita operación alguna ante SUNAT.
-          </p>
         </CardContent>
       </Card>
 

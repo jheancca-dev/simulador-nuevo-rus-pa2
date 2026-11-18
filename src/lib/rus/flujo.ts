@@ -73,10 +73,10 @@ export function intentarAgregarABandeja(
  * Procesa la decisión tomada en la pantalla de pago de prueba.
  *
  * Comportamiento esperado (requisito del enunciado):
- * - 'aprobado'  -> registra el resultado, cambia el estado a «Pago simulado
- *                  aprobado» y genera la constancia simulada.
+ * - 'aprobado'  -> registra el resultado, cambia el estado a «Pago
+ *                  aprobado» y genera la constancia.
  * - 'rechazado' -> NO genera constancia; la declaración pasa al estado
- *                  «Pago simulado rechazado» y admite reintento o corrección.
+ *                  «Pago rechazado» y admite reintento o corrección.
  * - 'cancelado' -> lo maneja la interfaz: regresa a la bandeja sin perder
  *                  datos y muestra `MENSAJE_OPERACION_CANCELADA`.
  *
@@ -93,7 +93,7 @@ export function procesarPagoSimulado(
   secuenciaOperacion: number,
 ): ResultadoProcesarPago {
   if (declaracion.estado === 'pago_aprobado') {
-    throw new Error('La declaración ya tiene un pago simulado aprobado.')
+    throw new Error('La declaración ya tiene un pago aprobado.')
   }
 
   if (decision === 'rechazado') {
@@ -101,7 +101,7 @@ export function procesarPagoSimulado(
       constancia: null,
       declaracion: { ...declaracion, estado: 'pago_rechazado' },
       mensaje:
-        'Pago simulado rechazado: no se generó constancia. Puede intentar el pago nuevamente, cancelar la operación o corregir los datos desde la bandeja.',
+        'Pago rechazado: no se generó constancia. Puede intentar el pago nuevamente, cancelar la operación o corregir los datos desde la bandeja.',
     }
   }
 
@@ -114,7 +114,7 @@ export function procesarPagoSimulado(
       ...declaracion,
       estado: 'pago_aprobado',
     },
-    mensaje: 'Pago simulado aprobado: puede generar la constancia académica simulada.',
+    mensaje: 'Pago aprobado: puede generar la constancia.',
   }
 }
 

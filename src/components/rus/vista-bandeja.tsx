@@ -4,7 +4,7 @@
  * Etapa 3 «Presente/Pague» — vista de la bandeja temporal.
  *
  * Muestra las declaraciones agregadas con sus estados diferenciados
- * («Agregado a bandeja», «Pago simulado rechazado», «Pago simulado aprobado»)
+ * («Agregado a bandeja», «Pago rechazado», «Pago aprobado»)
  * y permite revisar período, ingresos, compras, categoría y cuota.
  *
  * Notificaciones accesibles y descartables:
@@ -17,7 +17,7 @@
  *   sin pago aprobado (incluye reintentos tras un rechazo).
  * - «Corregir datos»: regresa al formulario con los datos precargados antes
  *   de confirmar el pago.
- * - «Ver constancia»: solo tras un pago simulado aprobado.
+ * - «Ver constancia»: solo tras un pago aprobado.
  */
 
 import { CheckCircle2, ClipboardList, PencilLine, Plus } from 'lucide-react'
@@ -70,7 +70,7 @@ interface VistaBandejaProps {
   onNuevaDeclaracion: () => void
 }
 
-/** Badge de estado diferenciado por resultado del pago simulado. */
+/** Badge de estado diferenciado por resultado del pago. */
 function BadgeEstado({ estado }: { estado: Declaracion['estado'] }) {
   const etiqueta = formatEstadoDeclaracion(estado)
 
@@ -113,7 +113,7 @@ export function VistaBandeja({
           Revise el período, los ingresos, las compras, la categoría y la cuota de cada declaración
           antes de presentarla.
         </CardDescription>
-        {/* Datos del contribuyente ficticio de pruebas (perfil único precargado) */}
+        {/* Datos del contribuyente (perfil único precargado) */}
         <p className="text-xs text-slate-500">
           {PERFIL_DEMOSTRACION.tipoCuenta}:{' '}
           <span className="font-semibold text-slate-700">{PERFIL_DEMOSTRACION.nombre}</span> · DNI{' '}
@@ -200,7 +200,7 @@ export function VistaBandeja({
                                   Período {declaracion.periodo} —{' '}
                                   {formatCategoria(declaracion.categoria)} — Importe a pagar:{' '}
                                   {formatSoles(declaracion.importeAPagar)}. Se abrirá la pantalla de
-                                  pago de prueba (completamente ficticia).
+                                  pago. No se realiza ningún cobro real.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
@@ -234,7 +234,7 @@ export function VistaBandeja({
       <CardFooter className="flex items-center justify-between">
         <p className="flex items-center gap-1.5 text-[11px] text-slate-500">
           <CheckCircle2 className="size-3.5 shrink-0 text-emerald-600" aria-hidden="true" />
-          Solo se genera constancia tras un pago simulado aprobado.
+          Solo se genera constancia tras un pago aprobado.
         </p>
         <Button variant="outline" onClick={onNuevaDeclaracion}>
           <Plus className="size-4" aria-hidden="true" />

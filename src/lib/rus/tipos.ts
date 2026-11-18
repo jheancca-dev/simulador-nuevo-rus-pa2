@@ -16,18 +16,18 @@ export type Etapa = 1 | 2 | 3 | 4
  *
  * Estados diferenciados del prototipo:
  * - «Agregado a bandeja»: declaración registrada, aún sin intento de pago.
- * - «Pago simulado rechazado»: el pago de prueba fue rechazado; puede
+ * - «Pago rechazado»: el pago fue rechazado; puede
  *   reintentarse o corregirse, pero NUNCA genera constancia.
- * - «Pago simulado aprobado»: pago de prueba aprobado; constancia disponible.
+ * - «Pago aprobado»: pago aprobado; constancia disponible.
  *
  * La «operación cancelada» no es un estado persistente: al cancelar se regresa
  * a la bandeja conservando la declaración con su último estado y se muestra la
  * notificación `MENSAJE_OPERACION_CANCELADA` (ver `flujo.ts`).
  */
 export type EstadoDeclaracion =
-  | 'agregada_bandeja' // «Agregado a bandeja»: aún sin pago simulado.
-  | 'pago_rechazado' // «Pago simulado rechazado»: sin constancia, admite reintento.
-  | 'pago_aprobado' // «Pago simulado aprobado»: constancia disponible.
+  | 'agregada_bandeja' // «Agregado a bandeja»: aún sin pago.
+  | 'pago_rechazado' // «Pago rechazado»: sin constancia, admite reintento.
+  | 'pago_aprobado' // «Pago aprobado»: constancia disponible.
 
 /** Decisión posible en la pantalla de pago de prueba (completamente ficticia). */
 export type DecisionPago = 'aprobado' | 'rechazado' | 'cancelado'
@@ -108,9 +108,9 @@ export interface ResultadoPagoSimulado {
   mensaje: string
 }
 
-/** Constancia académica simulada (etapa 4). */
+/** Constancia (etapa 4). */
 export interface ConstanciaSimulada {
-  titulo: 'CONSTANCIA ACADÉMICA SIMULADA'
+  titulo: 'CONSTANCIA'
   formulario: 'Formulario Virtual N.º 1611 — Nuevo RUS'
   /** Nombre del contribuyente ficticio (tomado del perfil de demostración). */
   contribuyenteNombre: string
@@ -129,13 +129,13 @@ export interface ConstanciaSimulada {
   cuotaMensual: number
   /** Casilla 504. */
   interesMoratorio: number
-  /** Casilla 505: importe pagado ficticiamente. */
+  /** Casilla 505: importe pagado. */
   importePagado: number
-  /** Fecha legible de la operación simulada (dd/mm/aaaa hh:mm:ss). */
+  /** Fecha legible de la operación (dd/mm/aaaa hh:mm:ss). */
   fechaOperacion: string
-  /** Número de operación ficticio con prefijo SIM-. */
+  /** Número de operación con prefijo SIM-. */
   numeroOperacion: string
-  estado: 'Pago simulado aprobado'
+  estado: 'Pago aprobado'
 }
 
 /** Resultado de procesar un pago simulado sobre una declaración de la bandeja. */

@@ -6,8 +6,8 @@
  * Etapas: 1 Seleccione -> 2 Complete -> 3 Presente/Pague -> 4 Constancia.
  *
  * Este componente también dibuja la estructura general de la página
- * (cabecera con perfil y contador de bandeja, advertencia académica
- * permanente y pie), y coordina las notificaciones del flujo:
+ * (cabecera con perfil y contador de bandeja, aviso de descargo permanente
+ * en la parte superior y pie), y coordina las notificaciones del flujo:
  *
  * - «Cargando datos, espere un momento...» (en el formulario, al elegir período).
  * - «Sr. Contribuyente, el formulario se agregó a la Bandeja de
@@ -15,7 +15,7 @@
  *   de pagos. Para continuar seleccione:» con «Volver al formulario» /
  *   «Ir a Presentar/Pagar».
  * - Confirmación de presentación Sí/No (en la bandeja).
- * - Mensajes diferenciados del pago de prueba: aprobado, rechazado y
+ * - Mensajes diferenciados del pago: aprobado, rechazado y
  *   operación cancelada.
  *
  * La lógica de negocio vive en `src/lib/rus` (funciones puras); este
@@ -37,6 +37,7 @@ import {
   intentarAgregarABandeja,
   procesarPagoSimulado,
 } from '@/lib/rus/flujo'
+import { AVISO_DESCARGO } from '@/lib/rus/perfil'
 import { splitPeriodo } from '@/lib/rus/validacion'
 import type {
   ConstanciaSimulada,
@@ -283,20 +284,17 @@ export function SimuladorRus() {
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-100 text-slate-900">
-      {/* Cabecera: título, bienvenida, perfil de demostración y contador de bandeja */}
+      {/* Cabecera: título, bienvenida, perfil y contador de bandeja */}
       <Cabecera cantidadBandeja={bandeja.length} />
 
-      {/* Advertencia permanente en todas las pantallas */}
+      {/* Aviso general de descargo: único aviso, visible en la parte superior */}
       <div
         role="alert"
         className="no-print border-b border-amber-300 bg-amber-50 text-amber-900"
       >
         <div className="mx-auto flex w-full max-w-5xl items-start gap-2.5 px-4 py-3 sm:px-6">
           <ShieldAlert className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
-          <p className="text-xs font-medium sm:text-sm">
-            SIMULADOR ACADÉMICO — DATOS FICTICIOS. No es una aplicación oficial de SUNAT. No
-            realiza declaraciones ni pagos reales.
-          </p>
+          <p className="text-xs font-medium sm:text-sm">{AVISO_DESCARGO}</p>
         </div>
       </div>
 
@@ -376,12 +374,10 @@ export function SimuladorRus() {
       {/* Pie fijo al fondo (no flota sobre el contenido gracias a mt-auto) */}
       <footer className="no-print mt-auto border-t border-slate-300 bg-slate-200 text-slate-700">
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-1 px-4 py-4 text-[11px] sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:text-xs">
-          <p className="font-medium">
-            Simulador Académico del Formulario Virtual N.º 1611 — Nuevo RUS
-          </p>
+          <p className="font-medium">Formulario Virtual N.º 1611 — Nuevo RUS</p>
           <p>
-            Simulación educativa sin conexión a SUNAT, bancos, Yape ni pasarelas de pago. No
-            almacena información personal real.
+            Sin conexión a SUNAT, bancos, Yape ni pasarelas de pago. No almacena información
+            personal real.
           </p>
         </div>
       </footer>

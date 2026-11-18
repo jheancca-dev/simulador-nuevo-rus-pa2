@@ -1,14 +1,14 @@
 'use client'
 
 /**
- * Cabecera institucional del simulador (visible en todas las etapas).
+ * Cabecera institucional (visible en todas las etapas).
  *
  * Incluye:
  * - Título «Formulario Virtual N.º 1611 — Nuevo RUS» con la denominación
  *   correcta del régimen: «Nuevo Régimen Único Simplificado (Nuevo RUS)»
  *   (no confundir con el RER, Régimen Especial de Renta).
- * - Panel de bienvenida del contribuyente ficticio precargado.
- * - Opción «Perfil de demostración»: muestra nombre, DNI y RUC ficticios.
+ * - Panel de bienvenida del contribuyente precargado.
+ * - Opción «Perfil»: muestra nombre, DNI y RUC del contribuyente.
  * - Contador discreto de la bandeja: «Bandeja (0)» / «Bandeja (1)» …
  *
  * Los datos del perfil provienen del módulo único `src/lib/rus/perfil.ts`.
@@ -36,7 +36,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { NOTA_DATOS_FICTICIOS, PERFIL_DEMOSTRACION } from '@/lib/rus/perfil'
+import { PERFIL_DEMOSTRACION } from '@/lib/rus/perfil'
 
 interface CabeceraProps {
   /** Cantidad de declaraciones actualmente en la bandeja temporal. */
@@ -50,8 +50,8 @@ interface FilaPerfil {
 
 const FILAS_PERFIL: FilaPerfil[] = [
   { etiqueta: 'Nombre', valor: PERFIL_DEMOSTRACION.nombre },
-  { etiqueta: 'DNI de demostración', valor: PERFIL_DEMOSTRACION.dni },
-  { etiqueta: 'RUC de demostración', valor: PERFIL_DEMOSTRACION.ruc },
+  { etiqueta: 'DNI', valor: PERFIL_DEMOSTRACION.dni },
+  { etiqueta: 'RUC', valor: PERFIL_DEMOSTRACION.ruc },
   { etiqueta: 'Régimen', valor: PERFIL_DEMOSTRACION.regimen },
   { etiqueta: 'Tipo de usuario', valor: PERFIL_DEMOSTRACION.tipoCuenta },
 ]
@@ -62,21 +62,22 @@ export function Cabecera({ cantidadBandeja }: CabeceraProps) {
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 py-5 sm:px-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-sky-100/90 sm:text-xs">
-            Simulador académico · Proyecto universitario
+            Proyecto universitario
           </p>
           <h1 className="mt-1 text-lg font-bold leading-tight sm:text-2xl">
             Formulario Virtual N.º 1611 — Nuevo RUS
           </h1>
           <p className="mt-1 text-xs text-sky-100/85 sm:text-sm">
-            Declaración mensual del Nuevo Régimen Único Simplificado (Nuevo RUS) · Curso: Pruebas y
-            Calidad de Software
+            Declaración mensual del Nuevo Régimen Único Simplificado (Nuevo RUS)
           </p>
         </div>
 
-        <div className="flex flex-col gap-2 rounded-lg border border-white/15 bg-white/10 px-3 py-3 lg:min-w-72 lg:items-end">
+        {/* Recuadro del usuario: contenido alineado a la izquierda con espaciado
+            horizontal amplio; el nombre arriba y las acciones debajo. */}
+        <div className="flex flex-col gap-2.5 rounded-lg border border-white/15 bg-white/10 px-4 py-3 lg:min-w-72">
           <p className="flex items-center gap-2 text-sm font-medium text-white">
             <UserRound className="size-4 shrink-0 text-sky-100" aria-hidden="true" />
-            Bienvenida, {PERFIL_DEMOSTRACION.nombre}
+            Bienvenido, {PERFIL_DEMOSTRACION.nombre}
           </p>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -98,14 +99,14 @@ export function Cabecera({ cantidadBandeja }: CabeceraProps) {
                   className="border-white/40 bg-transparent text-white hover:bg-white/15 hover:text-white"
                 >
                   <BadgeCheck className="size-4" aria-hidden="true" />
-                  Perfil de demostración
+                  Perfil
                 </Button>
               </DialogTrigger>
               <DialogContent id="panel-perfil-demostracion" className="sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle>Perfil de demostración</DialogTitle>
+                  <DialogTitle>Perfil del contribuyente</DialogTitle>
                   <DialogDescription>
-                    Contribuyente académico precargado, sin inicio de sesión real.
+                    Datos del contribuyente precargados en la sesión, sin inicio de sesión real.
                   </DialogDescription>
                 </DialogHeader>
 
@@ -120,8 +121,6 @@ export function Cabecera({ cantidadBandeja }: CabeceraProps) {
                     </div>
                   ))}
                 </dl>
-
-                <p className="text-xs text-slate-500">{NOTA_DATOS_FICTICIOS}</p>
 
                 <DialogFooter>
                   <DialogClose asChild>
