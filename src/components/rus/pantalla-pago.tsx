@@ -16,7 +16,8 @@ import {
   Wallet,
   XCircle,
 } from 'lucide-react'
-import { formatCategoria, formatSoles } from '@/lib/rus/formato'
+import { formatCategoria, formatEstadoDeclaracion, formatSoles } from '@/lib/rus/formato'
+import { PERFIL_DEMOSTRACION } from '@/lib/rus/perfil'
 import type { Declaracion } from '@/lib/rus/tipos'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -60,9 +61,21 @@ export function PantallaPago({
       </CardHeader>
 
       <CardContent className="flex flex-col gap-5">
-        {/* Resumen de la declaración */}
+        {/* Resumen de la declaración (con los datos del contribuyente de demostración) */}
         <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
           <dl className="grid gap-2 text-sm">
+            <div className="flex items-center justify-between gap-4">
+              <dt className="text-slate-600">Contribuyente (dato de demostración)</dt>
+              <dd className="font-medium">{PERFIL_DEMOSTRACION.nombre}</dd>
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <dt className="text-slate-600">DNI de demostración</dt>
+              <dd className="font-medium">{PERFIL_DEMOSTRACION.dni}</dd>
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <dt className="text-slate-600">RUC de demostración</dt>
+              <dd className="font-medium">{PERFIL_DEMOSTRACION.ruc}</dd>
+            </div>
             <div className="flex items-center justify-between gap-4">
               <dt className="text-slate-600">Período tributario</dt>
               <dd className="font-medium">{declaracion.periodo}</dd>
@@ -105,8 +118,7 @@ export function PantallaPago({
             <XCircle className="size-4" />
             <AlertTitle>Pago simulado rechazado</AlertTitle>
             <AlertDescription>
-              {mensajeRechazo} No se generó constancia; puede intentar el pago nuevamente o cancelar
-              la operación (la declaración se conserva en la bandeja).
+              {mensajeRechazo} La declaración se conserva en la bandeja.
             </AlertDescription>
           </Alert>
         ) : null}
@@ -114,7 +126,7 @@ export function PantallaPago({
         {pagoAprobado ? (
           <Alert className="border-emerald-300 bg-emerald-50 text-emerald-900">
             <CheckCircle2 className="size-4" />
-            <AlertTitle>Resultado registrado</AlertTitle>
+            <AlertTitle>Pago simulado aprobado</AlertTitle>
             <AlertDescription>
               El estado de la declaración cambió de «Agregado a bandeja» a «Pago simulado aprobado».
               Ya puede generar la constancia académica simulada.
@@ -149,7 +161,7 @@ export function PantallaPago({
         <p className="text-xs text-slate-500">
           Estado actual de la declaración:{' '}
           <span className="font-semibold">
-            {pagoAprobado ? 'Pago simulado aprobado' : 'Agregado a bandeja'}
+            {formatEstadoDeclaracion(declaracion.estado)}
           </span>
         </p>
       </CardContent>

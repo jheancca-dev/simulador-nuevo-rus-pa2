@@ -72,13 +72,16 @@ export function intentarAgregarABandeja(
 /**
  * Procesa la decisión tomada en la pantalla de pago de prueba.
  *
- * Comportamiento esperado (requisito 7 del enunciado):
+ * Comportamiento esperado (requisito del enunciado):
  * - 'aprobado'  -> registra el resultado, cambia el estado a «Pago simulado
  *                  aprobado» y genera la constancia simulada.
- * - 'rechazado' -> NO genera constancia; la declaración permanece «Agregado a
- *                  bandeja» y se puede intentar de nuevo.
- * - 'cancelado' -> no cambia nada; el componente simplemente regresa a la
- *                  bandeja conservando los datos.
+ * - 'rechazado' -> NO genera constancia; la declaración pasa al estado
+ *                  «Pago simulado rechazado» y admite reintento o corrección.
+ * - 'cancelado' -> lo maneja la interfaz: regresa a la bandeja sin perder
+ *                  datos y muestra `MENSAJE_OPERACION_CANCELADA`.
+ *
+ * Garantía probada: un pago rechazado o cancelado jamás produce constancia;
+ * solo la decisión 'aprobado' llega a `generarConstanciaSimulada`.
  *
  * `fechaOperacion` y `secuenciaOperacion` llegan como parámetros para que la
  * generación del número ficticio sea determinista en las pruebas.
@@ -96,9 +99,9 @@ export function procesarPagoSimulado(
   if (decision === 'rechazado') {
     return {
       constancia: null,
-      declaracion: { ...declaracion, estado: 'agregada_bandeja' },
+      declaracion: { ...declaracion, estado: 'pago_rechazado' },
       mensaje:
-        'Pago simulado rechazado: no se generó constancia. Puede intentar el pago nuevamente o cancelar la operación.',
+        'Pago simulado rechazado: no se generó constancia. Puede intentar el pago nuevamente, cancelar la operación o corregir los datos desde la bandeja.',
     }
   }
 
@@ -114,6 +117,13 @@ export function procesarPagoSimulado(
     mensaje: 'Pago simulado aprobado: puede generar la constancia académica simulada.',
   }
 }
+
+/**
+ * Notificación mostrada cuando el usuario cancela la operación de pago:
+ * la declaración permanece en la bandeja con su último estado y sin constancia.
+ */
+export const MENSAJE_OPERACION_CANCELADA =
+  'Operación cancelada: la declaración se conserva en la bandeja con sus datos y no se generó constancia.'
 
 /**
  * Reemplaza (por id) una declaración dentro de la bandeja y devuelve la nueva

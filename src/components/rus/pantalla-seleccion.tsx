@@ -45,8 +45,9 @@ export function PantallaSeleccion({ onContinuar }: PantallaSeleccionProps) {
       <CardHeader>
         <CardTitle className="text-lg sm:text-xl">Seleccione el trámite a simular</CardTitle>
         <CardDescription>
-          Este simulador incluye únicamente la declaración mensual del Nuevo RUS mediante el
-          Formulario Virtual N.º 1611.
+          Este simulador incluye únicamente la declaración mensual del Nuevo Régimen Único
+          Simplificado (Nuevo RUS) mediante el Formulario Virtual N.º 1611. No confundir con el
+          Régimen Especial de Renta (RER).
         </CardDescription>
       </CardHeader>
 

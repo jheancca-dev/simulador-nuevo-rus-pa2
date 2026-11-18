@@ -66,6 +66,7 @@ nivel de interfaz). Están organizadas así:
 | `tests/logic/calculo.test.ts` | Unitarias (reglas de cálculo) | Node |
 | `tests/logic/validacion.test.ts` | Unitarias (validación de entradas) | Node |
 | `tests/logic/flujo.test.ts` | Integración (bandeja + pago + constancia) | Node |
+| `tests/logic/perfil.test.ts` | Unitarias/integración (perfil ficticio, estados del pago, notificaciones) | Node |
 | `tests/ui/flujo-sistema.test.tsx` | Funcionales / sistema (flujo completo en UI) | jsdom |
 
 Comandos:
@@ -76,7 +77,7 @@ bun run test:watch   # modo observación para desarrollo (vitest)
 ```
 
 **Estado de ejecución:** en el entorno de desarrollo de este proyecto se ejecutaron las suites
-con `bun run test` obteniendo **54 pruebas aprobadas (4 archivos de prueba, 0 fallos)**. Los
+con `bun run test` obteniendo **73 pruebas aprobadas (5 archivos de prueba, 0 fallos)**. Los
 resultados pueden reproducirse localmente con los comandos indicados.
 
 ### Resumen de cada suite
@@ -88,11 +89,18 @@ resultados pueden reproducirse localmente con los comandos indicados.
   formatos inválidos, separador decimal (punto o coma), período MM/AAAA y validación completa de
   la declaración.
 - **flujo.test.ts (12 pruebas):** bloqueo de declaraciones inválidas, período duplicado,
-  rectificatoria bloqueada, pago rechazado (sin constancia), reintento tras rechazo, pago
-  aprobado (constancia completa) y número de operación determinista `SIM-…`.
-- **flujo-sistema.test.tsx (9 pruebas):** recorren la interfaz real: selección, formulario con
-  cálculo en vivo, errores junto a los campos, confirmación Sí/No, pago de prueba aprobado y
-  rechazado, constancia y navegación entre etapas.
+  rectificatoria bloqueada, pago rechazado (estado «Pago simulado rechazado», sin constancia),
+  reintento tras rechazo, pago aprobado (constancia completa) y número de operación determinista
+  `SIM-…`.
+- **perfil.test.ts (10 pruebas):** perfil de demostración (nombre, DNI/RUC marcadores no válidos,
+  régimen y tipo de cuenta), constancia con datos del contribuyente, estados diferenciados del
+  pago (agregado / rechazado / aprobado), mensaje de operación cancelada, etiquetas de estado y
+  duplicados sobre una declaración rechazada.
+- **flujo-sistema.test.tsx (18 pruebas):** recorren la interfaz real: cabecera con bienvenida y
+  contador de bandeja, diálogo «Perfil de demostración», aviso «Cargando datos, espere un
+  momento...», notificaciones de éxito y continuación cerrables, corrección de datos antes del
+  pago, confirmación Sí/No, pago de prueba aprobado/rechazado/cancelado con mensajes
+  diferenciados, constancia con el contribuyente y navegación entre etapas.
 
 ---
 
@@ -102,19 +110,22 @@ resultados pueden reproducirse localmente con los comandos indicados.
 src/
 ├── app/
 │   ├── layout.tsx                  # Metadatos e idioma (es)
-│   ├── page.tsx                    # Página única: encabezado, advertencia, pie
+│   ├── page.tsx                    # Página única (delega en SimuladorRus)
 │   └── globals.css                 # Tema institucional (azul/blanco/gris) + impresión
 ├── lib/rus/                        # LÓGICA DE NEGOCIO (independiente de la UI)
 │   ├── tipos.ts                    # Contratos de datos (Declaracion, Constancia, etc.)
+│   ├── perfil.ts                   # Perfil de demostración único (contribuyente ficticio)
 │   ├── calculo.ts                  # Reglas Nuevo RUS: categoría, cuota, importe
 │   ├── validacion.ts               # Lectura/validación de montos y período
 │   ├── constancia.ts               # Constancia simulada + número de operación SIM-
-│   ├── flujo.ts                    # Integración: bandeja, pago simulado, actualización
+│   ├── flujo.ts                    # Integración: bandeja, pago simulado, cancelación
 │   └── formato.ts                  # Formato es-PE (soles, fechas, etiquetas)
 └── components/
     ├── ui/                         # Componentes shadcn/ui reutilizados
     └── rus/                        # Componentes del simulador
-        ├── simulador-rus.tsx       # Orquestador (máquina de estados de etapas)
+        ├── simulador-rus.tsx       # Orquestador (máquina de estados + estructura general)
+        ├── cabecera.tsx            # Bienvenida, «Perfil de demostración» y «Bandeja (N)»
+        ├── notificacion-descartable.tsx # Notificaciones accesibles y cerrables
         ├── barra-etapas.tsx        # Etapas: Seleccione/Complete/Presente/Pague/Constancia
         ├── pantalla-seleccion.tsx  # Etapa 1
         ├── formulario-declaracion.tsx # Etapa 2 (casillas 507/607 editables)
@@ -161,15 +172,30 @@ tests/
 - **`validarEntradaDeclaracion(entrada)`** — Agrega todas las validaciones y calcula los datos;
   bloquea la rectificatoria (fuera de alcance) y los montos fuera de rango.
 
+### `src/lib/rus/perfil.ts`
+
+- **`PERFIL_DEMOSTRACION`** — módulo ÚNICO y reutilizable con el contribuyente ficticio
+  precargado: María Fernanda Quispe Huamán, DNI de demostración `00000000`, RUC de demostración
+  `00000000000`, régimen Nuevo RUS y tipo de cuenta «Contribuyente de demostración». La
+  cabecera, el resumen de la declaración y la constancia leen siempre de aquí para evitar
+  inconsistencias. Sin inicio de sesión real y sin validación contra SUNAT.
+- **`NOTA_DATOS_FICTICIOS`** — texto permanente que aclara que los números son marcadores
+  deliberadamente no válidos, destinados exclusivamente a pruebas académicas.
+
 ### `src/lib/rus/flujo.ts`
 
 - **`intentarAgregarABandeja(entrada, bandeja, secuencia, fecha)`** — Punto único de entrada a
   la bandeja: valida, impide duplicados de período y produce la declaración con estado
   «Agregado a bandeja».
-- **`procesarPagoSimulado(declaracion, decision, fecha, secuencia)`** — Pago de prueba:
+- **`procesarPagoSimulado(declaracion, decision, fecha, secuencia)`** — Pago de prueba con
+  mensajes diferenciados:
   - `aprobado` → cambia el estado a «Pago simulado aprobado» y genera la constancia;
-  - `rechazado` → **constancia `null`**, mensaje de reintento, la declaración queda en la bandeja;
-  - `cancelado` → lo maneja la interfaz regresando sin pérdida de datos.
+  - `rechazado` → **constancia `null`** y estado diferenciado «Pago simulado rechazado»
+    (admite reintento o corrección);
+  - `cancelado` → lo maneja la interfaz regresando a la bandeja con la notificación
+    **`MENSAJE_OPERACION_CANCELADA`** y sin pérdida de datos.
+
+  Garantía probada: solo la decisión `aprobado` llega a generar constancia.
 
 ### `src/lib/rus/constancia.ts`
 
@@ -180,17 +206,28 @@ tests/
 
 ### Componentes (`src/components/rus`)
 
-- **`SimuladorRus`** — Máquina de estados: etapas 1–4, subvistas de la etapa 3 y mensajes.
+- **`SimuladorRus`** — Máquina de estados: etapas 1–4, subvistas de la etapa 3, notificaciones
+  y estructura general de la página (cabecera, advertencia y pie).
+- **`Cabecera`** — Título con la denominación correcta «Nuevo Régimen Único Simplificado (Nuevo
+  RUS)» (no confundir con el RER), panel «Bienvenida, María Fernanda Quispe Huamán», opción
+  «Perfil de demostración» (diálogo con nombre, DNI y RUC ficticios) y contador discreto
+  «Bandeja (N)».
+- **`NotificacionDescartable`** — Notificaciones accesibles (`role="status"`, `aria-live`) con
+  botón de cierre: éxito al agregar, operación cancelada y aviso de corrección.
 - **`BarraEtapas`** — Progreso visual con `aria-current="step"`; permite volver a etapas ya
-  alcanzadas.
-- **`FormularioDeclaracion`** — Casillas 507 y 607 editables; 400, 503, 504, 505 y 509 de solo
-  lectura con cálculo **en vivo**; errores junto a cada campo.
-- **`VistaBandeja`** — Tabla revisable con estados diferenciados («Agregado a bandeja» /
-  «Pago simulado aprobado») y ventana de confirmación **Sí/No** antes de pagar.
-- **`PantallaPago`** — Pago completamente ficticio con tres acciones: aprobado, rechazado,
-  cancelar. No solicita datos financieros.
-- **`VistaConstancia`** — Documento académico simulado; botones Imprimir (CSS de impresión que
-  aísla el documento) y Guardar (descarga un HTML académico).
+  alcanzadas conservando el estado.
+- **`FormularioDeclaracion`** — Casillas 507 y 607 editables; 400 (categoría calculada), 503
+  (cuota calculada), 504 (valor fijo S/ 0 sin intereses), 505 (importe calculado) y 509 (no
+  implementada) de solo lectura con notas explicativas; aviso breve «Cargando datos, espere un
+  momento...» al seleccionar el período; errores junto a cada campo.
+- **`VistaBandeja`** — Tabla revisable con estados diferenciados («Agregado a bandeja»,
+  «Pago simulado rechazado», «Pago simulado aprobado»), ventana de confirmación **Sí/No**,
+  botón «Corregir datos» para declaraciones no aprobadas y datos del contribuyente.
+- **`PantallaPago`** — Pago completamente ficticio con tres acciones diferenciadas: aprobado,
+  rechazado y cancelar. No solicita datos financieros.
+- **`VistaConstancia`** — Documento académico simulado con el contribuyente (nombre, DNI y RUC
+  de demostración); botones Imprimir (CSS de impresión que aísla el documento) y Guardar
+  (descarga un HTML académico que también incluye el perfil).
 
 ---
 
@@ -220,9 +257,17 @@ tests/
 | RF-20 | Pago rechazado: mensaje y reintento, sin constancia. |
 | RF-21 | Pago cancelado: regreso a la bandeja sin perder datos. |
 | RF-22 | Pago aprobado: registro del resultado y generación de la constancia. |
-| RF-23 | Estados diferenciados: «Agregado a bandeja» vs «Pago simulado aprobado». |
-| RF-24 | Constancia con título «CONSTANCIA ACADÉMICA SIMULADA», formulario, período, ingresos, compras, categoría, cuota, importe pagado, fecha, número de operación ficticio y estado. |
+| RF-23 | Estados diferenciados: «Agregado a bandeja», «Pago simulado rechazado» y «Pago simulado aprobado»; la operación cancelada se notifica sin alterar la declaración. |
+| RF-24 | Constancia con título «CONSTANCIA ACADÉMICA SIMULADA», formulario, contribuyente de demostración (nombre, DNI y RUC), período, ingresos, compras, categoría, cuota, importe pagado, fecha, número de operación ficticio y estado. |
 | RF-25 | Opciones para imprimir y guardar la constancia. |
+| RF-26 | Terminología tributaria correcta: «Nuevo Régimen Único Simplificado (Nuevo RUS)» en toda la aplicación, sin confundirlo con el RER. |
+| RF-27 | Contribuyente ficticio precargado en un módulo único (`perfil.ts`): María Fernanda Quispe Huamán, DNI 00000000 y RUC 00000000000 deliberadamente no válidos, sin validación contra SUNAT. |
+| RF-28 | Cabecera con panel «Bienvenida, María Fernanda Quispe Huamán» y opción «Perfil de demostración» que muestra el nombre, el DNI y el RUC ficticios. |
+| RF-29 | Notificaciones accesibles y cerrables: «Cargando datos, espere un momento...» al elegir el período, «Sr. Contribuyente, el formulario se agregó a la Bandeja de Presentación/Pagos» al agregar, ventana «Usted añadió un formulario a la bandeja de pagos. Para continuar seleccione:» con «Volver al formulario» / «Ir a Presentar/Pagar», confirmación Sí/No y mensajes diferenciados del pago (aprobado, rechazado, cancelado). |
+| RF-30 | Contador discreto «Bandeja (0)» / «Bandeja (1)» en la cabecera. |
+| RF-31 | Prevención de duplicados accidentales de un mismo período tributario en la bandeja. |
+| RF-32 | «Corregir datos»: regresar al formulario con los datos precargados antes de confirmar el pago (declaraciones aún no aprobadas), retirándolas temporalmente de la bandeja. |
+| RF-33 | Ninguna constancia puede generarse tras un pago rechazado o cancelado; solo tras un pago simulado aprobado. |
 
 ## 6. Requisitos no funcionales
 
@@ -238,13 +283,15 @@ tests/
 | RNF-08 | Funciones deterministas probables automáticamente (fecha y secuencia inyectadas). |
 | RNF-09 | Pie de página fijo al final de la pantalla y sin solapamientos. |
 | RNF-10 | Sin claves de API, sin servicios externos y sin dependencias de red. |
+| RNF-11 | Notificaciones no bloqueantes, cerrables y anunciadas con `role="status"` / `aria-live="polite"`. |
+| RNF-12 | Datos de prueba centralizados en un único módulo (`perfil.ts`) para evitar inconsistencias entre pantallas. |
 
 ## 7. Cobertura de los casos de prueba exigidos
 
 | N.º | Caso exigido | Dónde se prueba |
 | --- | --- | --- |
 | 1 | Ingresos 1 325 / compras 1 825 → cuota S/ 20 | `calculo.test.ts` · `flujo.test.ts` · `flujo-sistema.test.tsx` |
-| 2 | Ingresos 6 000 / compras 2 000 → cuota S/ 50 | `calculo.test.ts` |
+| 2 | Ingresos 6 000 / compras 2 000 → cuota S/ 50 | `calculo.test.ts` · `flujo-sistema.test.tsx` (corrección de datos) |
 | 3 | Límite 5 000 → Categoría 1 | `calculo.test.ts` |
 | 4 | 5 000.01 → Categoría 2 | `calculo.test.ts` |
 | 5 | Límite 8 000 → Categoría 2 | `calculo.test.ts` |
@@ -252,22 +299,29 @@ tests/
 | 7 | Rechazo de ingresos negativos | `validacion.test.ts` · `flujo.test.ts` |
 | 8 | Rechazo de campos vacíos | `validacion.test.ts` · `flujo-sistema.test.tsx` |
 | 9 | Bloqueo de declaraciones inválidas | `flujo.test.ts` · `flujo-sistema.test.tsx` |
-| 10 | No hay constancia con pago rechazado | `flujo.test.ts` · `flujo-sistema.test.tsx` |
-| 11 | Constancia generada tras pago aprobado | `flujo.test.ts` · `flujo-sistema.test.tsx` |
+| 10 | No hay constancia con pago rechazado | `flujo.test.ts` · `perfil.test.ts` · `flujo-sistema.test.tsx` |
+| 11 | Constancia generada tras pago aprobado | `flujo.test.ts` · `perfil.test.ts` · `flujo-sistema.test.tsx` |
+| + | Perfil de demostración (nombre/DNI/RUC ficticios, módulo único) | `perfil.test.ts` · `flujo-sistema.test.tsx` |
+| + | Estados diferenciados y notificaciones cerrables (carga, éxito, continuación, cancelación) | `perfil.test.ts` · `flujo-sistema.test.tsx` |
+| + | Corrección de datos antes de confirmar el pago | `flujo-sistema.test.tsx` |
+| + | Contador de bandeja en la cabecera | `flujo-sistema.test.tsx` |
 
 ## 8. Limitaciones del prototipo
 
 - **Solo un proceso:** la declaración mensual ordinaria del Nuevo RUS. No hay rectificatorias,
   categoría especial ni otros formularios.
-- **Casilla 509 no implementada:** se muestra pero no calcula descuentos.
+- **Casilla 509 no implementada:** se muestra pero no calcula ni aplica compensaciones.
 - **Interés moratorio fijo en S/ 0:** solo escenarios ordinarios sin intereses.
 - **Sin persistencia:** la bandeja vive en memoria; al recargar se pierde (decisión académica).
+- **Perfil de demostración único y ficticio:** no hay inicio de sesión real; el DNI y el RUC
+  (`00000000` / `00000000000`) son marcadores deliberadamente no válidos y no se consultan ni
+  validan contra SUNAT ni contra ningún servicio.
 - **Pago 100 % ficticio:** no existen validaciones financieras; «aprobar» y «rechazar» son
   decisiones del usuario.
 - **Números de operación ficticios** con prefijo `SIM-1611-`, deliberadamente distintos a los
   formatos oficiales.
-- **Sin autenticación ni usuarios:** no hay inicio de sesión real.
-- **Sin conexión externa:** no consulta SUNAT, bancos, Yape ni pasarelas de pago.
+- **Sin conexión externa:** no consulta SUNAT, bancos, Yape ni pasarelas de pago; el aviso de
+  carga del período es solo visual y local.
 - **Reglas simplificadas:** se implementan exclusivamente las reglas del enunciado (categorías
   1 y 2); no se inventaron disposiciones tributarias adicionales.
 - **Pruebas de extremo a extremo:** las suites cubren unidades, integración y flujo funcional de

@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Simulador Académico — Formulario Virtual N.º 1611 (Nuevo RUS)",
   description:
-    "Prototipo educativo del curso Pruebas y Calidad de Software: simula la declaración mensual del Nuevo RUS (Formulario Virtual N.º 1611). No es una aplicación oficial de SUNAT; no realiza declaraciones ni pagos reales.",
+    "Prototipo educativo del curso Pruebas y Calidad de Software: simula la declaración mensual del Nuevo Régimen Único Simplificado (Nuevo RUS) mediante el Formulario Virtual N.º 1611. No es una aplicación oficial de SUNAT; no realiza declaraciones ni pagos reales.",
   keywords: [
     "simulador académico",
     "Nuevo RUS",

@@ -3,13 +3,25 @@
 /**
  * Etapa 3 «Presente/Pague» — vista de la bandeja temporal.
  *
- * Muestra las declaraciones agregadas con su estado («Agregado a bandeja» o
- * «Pago simulado aprobado») y permite revisar período, ingresos, compras,
- * categoría y cuota. El botón «Presentar/Pagar» abre primero una ventana de
- * confirmación con opciones Sí y No.
+ * Muestra las declaraciones agregadas con sus estados diferenciados
+ * («Agregado a bandeja», «Pago simulado rechazado», «Pago simulado aprobado»)
+ * y permite revisar período, ingresos, compras, categoría y cuota.
+ *
+ * Notificaciones accesibles y descartables:
+ * - Éxito: «Sr. Contribuyente, el formulario se agregó a la Bandeja de
+ *   Presentación/Pagos».
+ * - Operación cancelada: la declaración se conserva y no se genera constancia.
+ *
+ * Acciones por fila:
+ * - «Presentar/Pagar» (Sí/No en ventana de confirmación) para declaraciones
+ *   sin pago aprobado (incluye reintentos tras un rechazo).
+ * - «Corregir datos»: regresa al formulario con los datos precargados antes
+ *   de confirmar el pago.
+ * - «Ver constancia»: solo tras un pago simulado aprobado.
  */
 
-import { CheckCircle2, ClipboardList, Plus } from 'lucide-react'
+import { CheckCircle2, ClipboardList, PencilLine, Plus } from 'lucide-react'
+import { PERFIL_DEMOSTRACION } from '@/lib/rus/perfil'
 import { formatCategoria, formatEstadoDeclaracion, formatSoles } from '@/lib/rus/formato'
 import type { Declaracion } from '@/lib/rus/tipos'
 import {
@@ -23,7 +35,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -42,19 +53,52 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { NotificacionDescartable } from '@/components/rus/notificacion-descartable'
 
 interface VistaBandejaProps {
   bandeja: Declaracion[]
+  /** Notificación de éxito al agregar (descartable). */
   mensajeExito: string | null
+  /** Notificación de operación cancelada (descartable). */
+  mensajeCancelacion: string | null
+  onCerrarMensajeExito: () => void
+  onCerrarMensajeCancelacion: () => void
   onPresentarPagar: (id: string) => void
+  /** Corregir una declaración aún no aprobada desde el formulario. */
+  onCorregir: (id: string) => void
   onVerConstancia: (id: string) => void
   onNuevaDeclaracion: () => void
+}
+
+/** Badge de estado diferenciado por resultado del pago simulado. */
+function BadgeEstado({ estado }: { estado: Declaracion['estado'] }) {
+  const etiqueta = formatEstadoDeclaracion(estado)
+
+  if (estado === 'pago_aprobado') {
+    return (
+      <Badge className="border-emerald-200 bg-emerald-100 text-emerald-800 hover:bg-emerald-100">
+        {etiqueta}
+      </Badge>
+    )
+  }
+  if (estado === 'pago_rechazado') {
+    return (
+      <Badge className="border-red-200 bg-red-100 text-red-800 hover:bg-red-100">
+        {etiqueta}
+      </Badge>
+    )
+  }
+  return <Badge variant="secondary">{etiqueta}</Badge>
 }
 
 export function VistaBandeja({
   bandeja,
   mensajeExito,
+  mensajeCancelacion,
+  onCerrarMensajeExito,
+  onCerrarMensajeCancelacion,
   onPresentarPagar,
+  onCorregir,
   onVerConstancia,
   onNuevaDeclaracion,
 }: VistaBandejaProps) {
@@ -69,15 +113,32 @@ export function VistaBandeja({
           Revise el período, los ingresos, las compras, la categoría y la cuota de cada declaración
           antes de presentarla.
         </CardDescription>
+        {/* Datos del contribuyente de demostración (perfil único precargado) */}
+        <p className="text-xs text-slate-500">
+          Contribuyente de demostración:{' '}
+          <span className="font-semibold text-slate-700">{PERFIL_DEMOSTRACION.nombre}</span> · DNI{' '}
+          {PERFIL_DEMOSTRACION.dni} · RUC {PERFIL_DEMOSTRACION.ruc}
+        </p>
       </CardHeader>
 
       <CardContent className="flex flex-col gap-4">
         {mensajeExito ? (
-          <Alert className="border-emerald-300 bg-emerald-50 text-emerald-900">
-            <CheckCircle2 className="size-4" />
-            <AlertTitle>Declaración agregada</AlertTitle>
-            <AlertDescription>{mensajeExito}</AlertDescription>
-          </Alert>
+          <NotificacionDescartable
+            variante="exito"
+            titulo={mensajeExito}
+            descripcion="Revise los datos de la declaración antes de presentarla o pagarla."
+            etiquetaCerrar="Cerrar notificación de formulario agregado"
+            onCerrar={onCerrarMensajeExito}
+          />
+        ) : null}
+
+        {mensajeCancelacion ? (
+          <NotificacionDescartable
+            variante="alerta"
+            titulo={mensajeCancelacion}
+            etiquetaCerrar="Cerrar notificación de operación cancelada"
+            onCerrar={onCerrarMensajeCancelacion}
+          />
         ) : null}
 
         {bandeja.length === 0 ? (
@@ -113,43 +174,10 @@ export function VistaBandeja({
                       {formatSoles(declaracion.importeAPagar)}
                     </TableCell>
                     <TableCell>
-                      {declaracion.estado === 'pago_aprobado' ? (
-                        <Badge className="border-emerald-200 bg-emerald-100 text-emerald-800 hover:bg-emerald-100">
-                          {formatEstadoDeclaracion(declaracion.estado)}
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary">
-                          {formatEstadoDeclaracion(declaracion.estado)}
-                        </Badge>
-                      )}
+                      <BadgeEstado estado={declaracion.estado} />
                     </TableCell>
                     <TableCell className="text-right">
-                      {declaracion.estado === 'agregada_bandeja' ? (
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button size="sm">Presentar/Pagar</Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>
-                                ¿Confirma presentar y pagar esta declaración?
-                              </AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Período {declaracion.periodo} —{' '}
-                                {formatCategoria(declaracion.categoria)} — Importe a pagar:{' '}
-                                {formatSoles(declaracion.importeAPagar)}. Se abrirá la pantalla de
-                                pago de prueba (completamente ficticia).
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>No</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => onPresentarPagar(declaracion.id)}>
-                                Sí
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      ) : (
+                      {declaracion.estado === 'pago_aprobado' ? (
                         <Button
                           size="sm"
                           variant="outline"
@@ -157,6 +185,42 @@ export function VistaBandeja({
                         >
                           Ver constancia
                         </Button>
+                      ) : (
+                        <div className="flex flex-col items-end gap-1.5">
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm">Presentar/Pagar</Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  ¿Confirma presentar y pagar esta declaración?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Período {declaracion.periodo} —{' '}
+                                  {formatCategoria(declaracion.categoria)} — Importe a pagar:{' '}
+                                  {formatSoles(declaracion.importeAPagar)}. Se abrirá la pantalla de
+                                  pago de prueba (completamente ficticia).
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>No</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => onPresentarPagar(declaracion.id)}>
+                                  Sí
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => onCorregir(declaracion.id)}
+                            className="text-slate-600"
+                          >
+                            <PencilLine className="size-3.5" aria-hidden="true" />
+                            Corregir datos
+                          </Button>
+                        </div>
                       )}
                     </TableCell>
                   </TableRow>
@@ -167,7 +231,11 @@ export function VistaBandeja({
         )}
       </CardContent>
 
-      <CardFooter className="flex justify-end">
+      <CardFooter className="flex items-center justify-between">
+        <p className="flex items-center gap-1.5 text-[11px] text-slate-500">
+          <CheckCircle2 className="size-3.5 shrink-0 text-emerald-600" aria-hidden="true" />
+          Solo se genera constancia tras un pago simulado aprobado.
+        </p>
         <Button variant="outline" onClick={onNuevaDeclaracion}>
           <Plus className="size-4" aria-hidden="true" />
           Nueva declaración

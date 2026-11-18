@@ -11,9 +11,22 @@ export type CategoriaRus = 1 | 2
 /** Etapas del flujo simulado, en el mismo orden que la barra superior. */
 export type Etapa = 1 | 2 | 3 | 4
 
-/** Estado de una declaración dentro de la bandeja temporal. */
+/**
+ * Estado de una declaración dentro de la bandeja temporal.
+ *
+ * Estados diferenciados del prototipo:
+ * - «Agregado a bandeja»: declaración registrada, aún sin intento de pago.
+ * - «Pago simulado rechazado»: el pago de prueba fue rechazado; puede
+ *   reintentarse o corregirse, pero NUNCA genera constancia.
+ * - «Pago simulado aprobado»: pago de prueba aprobado; constancia disponible.
+ *
+ * La «operación cancelada» no es un estado persistente: al cancelar se regresa
+ * a la bandeja conservando la declaración con su último estado y se muestra la
+ * notificación `MENSAJE_OPERACION_CANCELADA` (ver `flujo.ts`).
+ */
 export type EstadoDeclaracion =
   | 'agregada_bandeja' // «Agregado a bandeja»: aún sin pago simulado.
+  | 'pago_rechazado' // «Pago simulado rechazado»: sin constancia, admite reintento.
   | 'pago_aprobado' // «Pago simulado aprobado»: constancia disponible.
 
 /** Decisión posible en la pantalla de pago de prueba (completamente ficticia). */
@@ -99,6 +112,12 @@ export interface ResultadoPagoSimulado {
 export interface ConstanciaSimulada {
   titulo: 'CONSTANCIA ACADÉMICA SIMULADA'
   formulario: 'Formulario Virtual N.º 1611 — Nuevo RUS'
+  /** Nombre del contribuyente ficticio (tomado del perfil de demostración). */
+  contribuyenteNombre: string
+  /** DNI de demostración (marcador no válido). */
+  contribuyenteDni: string
+  /** RUC de demostración (marcador no válido). */
+  contribuyenteRuc: string
   periodo: string
   /** Casilla 507. */
   ingresos: number

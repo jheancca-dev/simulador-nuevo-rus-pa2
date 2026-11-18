@@ -35,6 +35,9 @@ interface FilaConstancia {
 /** Genera el contenido HTML descargable de la constancia (solo texto académico). */
 function construirHtmlDescargable(constancia: ConstanciaSimulada): string {
   const filas: Array<[string, string]> = [
+    ['Contribuyente (dato de demostración)', constancia.contribuyenteNombre],
+    ['DNI de demostración', constancia.contribuyenteDni],
+    ['RUC de demostración', constancia.contribuyenteRuc],
     ['Formulario', constancia.formulario],
     ['Período tributario', constancia.periodo],
     ['Total de ingresos brutos (casilla 507)', formatSoles(constancia.ingresos)],
@@ -93,6 +96,13 @@ export function VistaConstancia({
   }
 
   const filas: FilaConstancia[] = [
+    {
+      etiqueta: 'Contribuyente (dato de demostración)',
+      valor: constancia.contribuyenteNombre,
+      completo: true,
+    },
+    { etiqueta: 'DNI de demostración', valor: constancia.contribuyenteDni },
+    { etiqueta: 'RUC de demostración', valor: constancia.contribuyenteRuc },
     { etiqueta: 'Período tributario', valor: constancia.periodo, completo: true },
     {
       etiqueta: 'Total de ingresos brutos (casilla 507)',

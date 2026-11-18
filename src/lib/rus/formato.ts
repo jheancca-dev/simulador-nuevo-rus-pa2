@@ -29,6 +29,10 @@ export function formatCategoria(categoria: 1 | 2): string {
 }
 
 /** Etiqueta legible del estado de una declaración en la bandeja. */
-export function formatEstadoDeclaracion(estado: 'agregada_bandeja' | 'pago_aprobado'): string {
-  return estado === 'agregada_bandeja' ? 'Agregado a bandeja' : 'Pago simulado aprobado'
+export function formatEstadoDeclaracion(
+  estado: 'agregada_bandeja' | 'pago_rechazado' | 'pago_aprobado',
+): string {
+  if (estado === 'pago_aprobado') return 'Pago simulado aprobado'
+  if (estado === 'pago_rechazado') return 'Pago simulado rechazado'
+  return 'Agregado a bandeja'
 }

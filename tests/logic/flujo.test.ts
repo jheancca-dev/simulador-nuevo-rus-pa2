@@ -114,7 +114,8 @@ describe('Caso 10: pago rechazado no genera constancia', () => {
     const resultado = procesarPagoSimulado(declaracion, 'rechazado', FECHA_FIJA, 1)
 
     expect(resultado.constancia).toBeNull()
-    expect(resultado.declaracion.estado).toBe('agregada_bandeja')
+    // Estado diferenciado: la declaración queda marcada como rechazada.
+    expect(resultado.declaracion.estado).toBe('pago_rechazado')
     expect(resultado.mensaje).toContain('rechazado')
   })
 

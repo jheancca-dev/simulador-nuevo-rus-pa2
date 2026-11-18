@@ -9,6 +9,7 @@
  *   confundirse con un comprobante tributario auténtico de SUNAT.
  */
 
+import { PERFIL_DEMOSTRACION } from './perfil'
 import { formatFechaOperacion } from './formato'
 import type { ConstanciaSimulada, Declaracion } from './tipos'
 
@@ -36,6 +37,9 @@ export function generarNumeroOperacionSimulado(fecha: Date, secuencia: number): 
  * Construye la constancia simulada a partir de una declaración que ya tiene
  * un pago de prueba aprobado. Esta función NO decide si se aprueba el pago:
  * esa decisión vive en `flujo.ts/procesarPagoSimulado`.
+ *
+ * Los datos del contribuyente provienen siempre del perfil de demostración
+ * (`perfil.ts`), único módulo de datos de prueba, para evitar inconsistencias.
  */
 export function generarConstanciaSimulada(
   declaracion: Declaracion,
@@ -45,6 +49,9 @@ export function generarConstanciaSimulada(
   return {
     titulo: 'CONSTANCIA ACADÉMICA SIMULADA',
     formulario: 'Formulario Virtual N.º 1611 — Nuevo RUS',
+    contribuyenteNombre: PERFIL_DEMOSTRACION.nombre,
+    contribuyenteDni: PERFIL_DEMOSTRACION.dni,
+    contribuyenteRuc: PERFIL_DEMOSTRACION.ruc,
     periodo: declaracion.periodo,
     ingresos: declaracion.ingresos,
     compras: declaracion.compras,

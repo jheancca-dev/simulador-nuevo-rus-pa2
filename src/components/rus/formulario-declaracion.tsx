@@ -4,20 +4,27 @@
  * Etapa 2 «Complete»: formulario del Formulario Virtual N.º 1611 (Nuevo RUS).
  *
  * - Casillas 507 y 607 son editables (ingresos y compras).
- * - Casillas 400, 503, 504, 505 y 509 son de solo lectura: se calculan con las
- *   funciones puras de `src/lib/rus` y se actualizan en vivo al cambiar los datos.
- * - El interés moratorio (504) es S/ 0 en esta versión (declaraciones ordinarias
- *   sin intereses) y la compensación de percepciones del IGV (509) no está
- *   implementada.
+ * - Casillas de solo lectura, cada una con tratamiento explícito:
+ *     · 400: categoría calculada automáticamente.
+ *     · 503: cuota mensual calculada automáticamente.
+ *     · 504: valor fijo S/ 0 (escenario ordinario académico sin intereses).
+ *     · 505: importe calculado automáticamente.
+ *     · 509: funcionalidad NO implementada (no se calcula ni se aplica
+ *       compensación) en esta versión.
+ * - Al seleccionar el período se muestra brevemente el mensaje
+ *   «Cargando datos, espere un momento...» (solo visual y local, sin
+ *   conexiones tributarias reales).
  * - Los errores de validación se muestran junto a cada campo.
  */
 
-import { Ban, ClipboardPlus, Lock } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Ban, ClipboardPlus, Loader2, Lock } from 'lucide-react'
 import { calcularCategoriaYCuota } from '@/lib/rus/calculo'
 import { formatCategoria, formatSoles } from '@/lib/rus/formato'
 import { leerMonto } from '@/lib/rus/validacion'
 import type { ErroresValidacion } from '@/lib/rus/tipos'
 import { cn } from '@/lib/utils'
+import { NotificacionDescartable } from '@/components/rus/notificacion-descartable'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
@@ -75,6 +82,9 @@ const ANIOS: string[] = (() => {
 interface FormularioDeclaracionProps {
   formulario: EstadoFormulario
   errores: ErroresValidacion
+  /** Aviso informativo opcional (p. ej. edición de una declaración de la bandeja). */
+  aviso?: string | null
+  onCerrarAviso?: () => void
   onCambios: (cambios: Partial<EstadoFormulario>) => void
   onAgregarABandeja: () => void
   onVolver: () => void
@@ -132,13 +142,57 @@ function CampoCalculado({
   )
 }
 
+/** Duración (ms) del aviso «Cargando datos, espere un momento...». */
+const DURACION_AVISO_CARGA_MS = 1000
+
 export function FormularioDeclaracion({
   formulario,
   errores,
+  aviso,
+  onCerrarAviso,
   onCambios,
   onAgregarABandeja,
   onVolver,
 }: FormularioDeclaracionProps) {
+  // Aviso breve y local al seleccionar el período tributario (mes o año):
+  // solo visual, sin conexiones tributarias reales. Se dispara desde los
+  // eventos de selección (sin setState dentro de efectos).
+  const [cargandoPeriodo, setCargandoPeriodo] = useState(false)
+  const temporizadorRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const iniciarAvisoCarga = useCallback(() => {
+    setCargandoPeriodo(true)
+    if (temporizadorRef.current) clearTimeout(temporizadorRef.current)
+    temporizadorRef.current = setTimeout(
+      () => setCargandoPeriodo(false),
+      DURACION_AVISO_CARGA_MS,
+    )
+  }, [])
+
+  // Al desmontar el formulario se limpia el temporizador pendiente.
+  useEffect(
+    () => () => {
+      if (temporizadorRef.current) clearTimeout(temporizadorRef.current)
+    },
+    [],
+  )
+
+  const cambiarPeriodoMes = useCallback(
+    (valor: string) => {
+      iniciarAvisoCarga()
+      onCambios({ periodoMes: valor })
+    },
+    [iniciarAvisoCarga, onCambios],
+  )
+
+  const cambiarPeriodoAnio = useCallback(
+    (valor: string) => {
+      iniciarAvisoCarga()
+      onCambios({ periodoAnio: valor })
+    },
+    [iniciarAvisoCarga, onCambios],
+  )
+
   // Cálculo en vivo: se recalcula con cada cambio de los campos de entrada.
   const lecturaIngresos = leerMonto(formulario.ingresosTexto)
   const lecturaCompras = leerMonto(formulario.comprasTexto)
@@ -162,15 +216,26 @@ export function FormularioDeclaracion({
     <Card className="border-slate-200 shadow-sm">
       <CardHeader>
         <CardTitle className="text-lg sm:text-xl">
-          Complete la declaración mensual del Nuevo RUS
+          Complete la declaración mensual del Nuevo Régimen Único Simplificado (Nuevo RUS)
         </CardTitle>
         <CardDescription>
-          Ingrese sus datos del mes. Las casillas 400, 503, 504, 505 y 509 son de solo lectura y se
-          calculan automáticamente.
+          Ingrese sus datos del mes. Las casillas 400, 503, 504, 505 y 509 son de solo lectura y
+          cada una tiene un tratamiento específico que se indica debajo de su valor.
         </CardDescription>
       </CardHeader>
 
       <CardContent className="flex flex-col gap-6">
+        {/* Aviso de edición (corrección desde la bandeja) */}
+        {aviso && onCerrarAviso ? (
+          <NotificacionDescartable
+            variante="info"
+            titulo="Corrección de declaración"
+            descripcion={aviso}
+            etiquetaCerrar="Cerrar aviso de corrección"
+            onCerrar={onCerrarAviso}
+          />
+        ) : null}
+
         {/* Período tributario */}
         <div className="grid gap-2">
           <Label htmlFor="periodo-mes">Período tributario (MM/AAAA)</Label>
@@ -178,7 +243,7 @@ export function FormularioDeclaracion({
             <div>
               <Select
                 value={formulario.periodoMes}
-                onValueChange={(valor) => onCambios({ periodoMes: valor })}
+                onValueChange={cambiarPeriodoMes}
               >
                 <SelectTrigger
                   id="periodo-mes"
@@ -201,7 +266,7 @@ export function FormularioDeclaracion({
             <div>
               <Select
                 value={formulario.periodoAnio}
-                onValueChange={(valor) => onCambios({ periodoAnio: valor })}
+                onValueChange={cambiarPeriodoAnio}
               >
                 <SelectTrigger
                   id="periodo-anio"
@@ -222,6 +287,19 @@ export function FormularioDeclaracion({
               </Select>
             </div>
           </div>
+
+          {/* Aviso de carga (solo visual y local) tras la selección del período */}
+          {cargandoPeriodo ? (
+            <p
+              role="status"
+              aria-live="polite"
+              className="flex items-center gap-2 text-xs font-medium text-sky-700"
+            >
+              <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+              Cargando datos, espere un momento...
+            </p>
+          ) : null}
+
           <MensajeError id="error-periodo" mensaje={errores.periodo} />
         </div>
 
@@ -344,23 +422,25 @@ export function FormularioDeclaracion({
             etiqueta="Categoría"
             casilla="400"
             valor={dentroDeRango ? formatCategoria(dentroDeRango.categoria) : '—'}
+            nota="Categoría calculada automáticamente según el mayor importe entre ingresos y compras."
           />
           <CampoCalculado
             etiqueta="Monto de cuota mensual"
             casilla="503"
             valor={dentroDeRango ? formatSoles(dentroDeRango.cuotaMensual) : '—'}
+            nota="Cuota mensual calculada automáticamente según la categoría (S/ 20 o S/ 50)."
           />
           <CampoCalculado
             etiqueta="Interés moratorio"
             casilla="504"
             valor={formatSoles(0)}
-            nota="En esta versión solo se simulan declaraciones ordinarias sin intereses."
+            nota="Valor fijo S/ 0 en el escenario ordinario académico sin intereses."
           />
           <CampoCalculado
             etiqueta="Compensación de percepciones del IGV"
             casilla="509"
             valor="Función no implementada"
-            nota="No se aplican descuentos en esta versión del simulador."
+            nota="Funcionalidad no implementada: no se calcula ni se aplica compensación en esta versión."
           />
           <div className="sm:col-span-2">
             <CampoCalculado
@@ -368,7 +448,7 @@ export function FormularioDeclaracion({
               casilla="505"
               valor={dentroDeRango ? formatSoles(dentroDeRango.importeAPagar) : '—'}
               destacado
-              nota="Cuota mensual más interés moratorio, menos compensaciones (0 en esta versión)."
+              nota="Importe calculado automáticamente: cuota mensual más interés moratorio, menos compensaciones."
             />
           </div>
         </section>
