@@ -12,6 +12,15 @@
  * - Contador discreto de la bandeja: «Bandeja (0)» / «Bandeja (1)» …
  *
  * Los datos del perfil provienen del módulo único `src/lib/rus/perfil.ts`.
+ *
+ * Nota de accesibilidad: el disparador y el panel del diálogo usan
+ * identificadores ESTÁTICOS (`panel-perfil-demostracion`) en lugar de los
+ * IDs generados por Radix con `useId`. El valor de `useId` puede divergir
+ * entre el HTML del servidor y un pase de hidratación diferido en desarrollo
+ * (Next.js/Turbopack), lo que provoca un mismatch de hidratación en el
+ * atributo `aria-controls`. Al anclar id/aria-controls a una constante, ambos
+ * renderizados son idénticos por construcción y la relación accesible
+ * disparador↔panel es estable en todas las recargas.
  */
 
 import { BadgeCheck, UserRound } from 'lucide-react'
@@ -79,7 +88,10 @@ export function Cabecera({ cantidadBandeja }: CabeceraProps) {
             </Badge>
 
             <Dialog>
-              <DialogTrigger asChild>
+              {/* Radix aplica las props del usuario después de los atributos
+                  generados: pasar aria-controls/id explícitos los ancla a un
+                  valor constante e idéntico en servidor y cliente. */}
+              <DialogTrigger asChild aria-controls="panel-perfil-demostracion">
                 <Button
                   size="sm"
                   variant="outline"
@@ -89,7 +101,7 @@ export function Cabecera({ cantidadBandeja }: CabeceraProps) {
                   Perfil de demostración
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
+              <DialogContent id="panel-perfil-demostracion" className="sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle>Perfil de demostración</DialogTitle>
                   <DialogDescription>
