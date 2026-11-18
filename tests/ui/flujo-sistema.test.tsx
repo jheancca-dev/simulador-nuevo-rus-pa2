@@ -53,7 +53,7 @@ describe('Cabecera: contribuyente ficticio y contador de bandeja', () => {
   it('muestra la bienvenida del perfil de demostración y el contador discreto', () => {
     render(<SimuladorRus />)
 
-    expect(screen.getByText(/bienvenida, maría fernanda quispe huamán/i)).toBeInTheDocument()
+    expect(screen.getByText(/bienvenida, pepe lucho pérez/i)).toBeInTheDocument()
     expect(screen.getByText('Bandeja (0)')).toBeInTheDocument()
   })
 
@@ -63,10 +63,10 @@ describe('Cabecera: contribuyente ficticio y contador de bandeja', () => {
 
     await usuario.click(screen.getByRole('button', { name: /perfil de demostración/i }))
     const dialogo = await screen.findByRole('dialog')
-    expect(within(dialogo).getByText('María Fernanda Quispe Huamán')).toBeInTheDocument()
+    expect(within(dialogo).getByText('Pepe Lucho Pérez')).toBeInTheDocument()
     expect(within(dialogo).getByText('00000000')).toBeInTheDocument()
     expect(within(dialogo).getByText('00000000000')).toBeInTheDocument()
-    expect(within(dialogo).getByText('Contribuyente de demostración')).toBeInTheDocument()
+    expect(within(dialogo).getByText('Contribuyente ficticio de pruebas')).toBeInTheDocument()
     expect(within(dialogo).getByText(/marcadores deliberadamente no válidos/i)).toBeInTheDocument()
 
     // Cierre correcto del diálogo.
@@ -365,7 +365,7 @@ describe('Flujo completo del simulador (nivel sistema)', () => {
     expect(
       screen.getAllByText('Formulario Virtual N.º 1611 — Nuevo RUS').length,
     ).toBeGreaterThanOrEqual(1)
-    expect(screen.getByText('María Fernanda Quispe Huamán')).toBeInTheDocument()
+    expect(screen.getByText('Pepe Lucho Pérez')).toBeInTheDocument()
     expect(screen.getByText('00000000')).toBeInTheDocument()
     expect(screen.getByText('00000000000')).toBeInTheDocument()
     expect(screen.getByText('03/2025')).toBeInTheDocument()

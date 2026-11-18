@@ -113,9 +113,9 @@ export function VistaBandeja({
           Revise el período, los ingresos, las compras, la categoría y la cuota de cada declaración
           antes de presentarla.
         </CardDescription>
-        {/* Datos del contribuyente de demostración (perfil único precargado) */}
+        {/* Datos del contribuyente ficticio de pruebas (perfil único precargado) */}
         <p className="text-xs text-slate-500">
-          Contribuyente de demostración:{' '}
+          {PERFIL_DEMOSTRACION.tipoCuenta}:{' '}
           <span className="font-semibold text-slate-700">{PERFIL_DEMOSTRACION.nombre}</span> · DNI{' '}
           {PERFIL_DEMOSTRACION.dni} · RUC {PERFIL_DEMOSTRACION.ruc}
         </p>

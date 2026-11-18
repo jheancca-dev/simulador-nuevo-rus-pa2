@@ -35,11 +35,11 @@ function crearDeclaracionEnBandeja(secuencia = 1): Declaracion {
 describe('Perfil de demostración: contribuyente ficticio precargado', () => {
   it('Contiene exactamente el nombre, DNI, RUC, régimen y tipo de cuenta exigidos', () => {
     expect(PERFIL_DEMOSTRACION).toEqual({
-      nombre: 'María Fernanda Quispe Huamán',
+      nombre: 'Pepe Lucho Pérez',
       dni: '00000000',
       ruc: '00000000000',
       regimen: 'Nuevo RUS',
-      tipoCuenta: 'Contribuyente de demostración',
+      tipoCuenta: 'Contribuyente ficticio de pruebas',
     })
   })
 
@@ -63,7 +63,7 @@ describe('La constancia incluye los datos del contribuyente ficticio', () => {
     expect(aprobado.constancia).toMatchObject({
       titulo: 'CONSTANCIA ACADÉMICA SIMULADA',
       formulario: 'Formulario Virtual N.º 1611 — Nuevo RUS',
-      contribuyenteNombre: 'María Fernanda Quispe Huamán',
+      contribuyenteNombre: 'Pepe Lucho Pérez',
       contribuyenteDni: '00000000',
       contribuyenteRuc: '00000000000',
       estado: 'Pago simulado aprobado',

@@ -294,8 +294,8 @@ export function SimuladorRus() {
         <div className="mx-auto flex w-full max-w-5xl items-start gap-2.5 px-4 py-3 sm:px-6">
           <ShieldAlert className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
           <p className="text-xs font-medium sm:text-sm">
-            SIMULADOR ACADÉMICO — No es una aplicación oficial de SUNAT. No realiza declaraciones
-            ni pagos reales.
+            SIMULADOR ACADÉMICO — DATOS FICTICIOS. No es una aplicación oficial de SUNAT. No
+            realiza declaraciones ni pagos reales.
           </p>
         </div>
       </div>

@@ -1,7 +1,8 @@
 # Simulador Académico del Formulario Virtual N.º 1611 — Nuevo RUS
 
-> **SIMULADOR ACADÉMICO** — No es una aplicación oficial de SUNAT. No realiza declaraciones ni
-> pagos reales. No se conecta a sistemas de SUNAT, bancos, Yape ni pasarelas de pago.
+> **SIMULADOR ACADÉMICO — DATOS FICTICIOS** — No es una aplicación oficial de SUNAT. No realiza
+> declaraciones ni pagos reales. No se conecta a sistemas de SUNAT, bancos, Yape ni pasarelas de
+> pago.
 
 Prototipo educativo desarrollado como proyecto universitario del curso **Pruebas y Calidad de
 Software**. Simula un único proceso: la **declaración mensual del Nuevo RUS** mediante el
@@ -175,8 +176,8 @@ tests/
 ### `src/lib/rus/perfil.ts`
 
 - **`PERFIL_DEMOSTRACION`** — módulo ÚNICO y reutilizable con el contribuyente ficticio
-  precargado: María Fernanda Quispe Huamán, DNI de demostración `00000000`, RUC de demostración
-  `00000000000`, régimen Nuevo RUS y tipo de cuenta «Contribuyente de demostración». La
+  precargado: Pepe Lucho Pérez, DNI de demostración `00000000`, RUC de demostración
+  `00000000000`, régimen Nuevo RUS y tipo de usuario «Contribuyente ficticio de pruebas». La
   cabecera, el resumen de la declaración y la constancia leen siempre de aquí para evitar
   inconsistencias. Sin inicio de sesión real y sin validación contra SUNAT.
 - **`NOTA_DATOS_FICTICIOS`** — texto permanente que aclara que los números son marcadores
@@ -209,7 +210,7 @@ tests/
 - **`SimuladorRus`** — Máquina de estados: etapas 1–4, subvistas de la etapa 3, notificaciones
   y estructura general de la página (cabecera, advertencia y pie).
 - **`Cabecera`** — Título con la denominación correcta «Nuevo Régimen Único Simplificado (Nuevo
-  RUS)» (no confundir con el RER), panel «Bienvenida, María Fernanda Quispe Huamán», opción
+  RUS)» (no confundir con el RER), panel «Bienvenida, Pepe Lucho Pérez», opción
   «Perfil de demostración» (diálogo con nombre, DNI y RUC ficticios) y contador discreto
   «Bandeja (N)».
 - **`NotificacionDescartable`** — Notificaciones accesibles (`role="status"`, `aria-live`) con
@@ -235,7 +236,7 @@ tests/
 
 | ID | Requisito |
 | --- | --- |
-| RF-01 | Mostrar en todas las pantallas la advertencia «SIMULADOR ACADÉMICO — No es una aplicación oficial de SUNAT. No realiza declaraciones ni pagos reales». |
+| RF-01 | Mostrar en todas las pantallas la advertencia «SIMULADOR ACADÉMICO — DATOS FICTICIOS. No es una aplicación oficial de SUNAT. No realiza declaraciones ni pagos reales». |
 | RF-02 | Presentar cuatro etapas (Seleccione, Complete, Presente/Pague, Constancia) con la etapa actual identificada y navegación atrás. |
 | RF-03 | Etapa 1: seleccionar el único trámite incluido (declaración mensual del Nuevo RUS) y mostrar los trámites fuera de alcance. |
 | RF-04 | Formulario con período tributario MM/AAAA (selectores de mes y año). |
@@ -258,11 +259,11 @@ tests/
 | RF-21 | Pago cancelado: regreso a la bandeja sin perder datos. |
 | RF-22 | Pago aprobado: registro del resultado y generación de la constancia. |
 | RF-23 | Estados diferenciados: «Agregado a bandeja», «Pago simulado rechazado» y «Pago simulado aprobado»; la operación cancelada se notifica sin alterar la declaración. |
-| RF-24 | Constancia con título «CONSTANCIA ACADÉMICA SIMULADA», formulario, contribuyente de demostración (nombre, DNI y RUC), período, ingresos, compras, categoría, cuota, importe pagado, fecha, número de operación ficticio y estado. |
+| RF-24 | Constancia con título «CONSTANCIA ACADÉMICA SIMULADA», formulario, contribuyente ficticio de pruebas (nombre, DNI y RUC), período, ingresos, compras, categoría, cuota, importe pagado, fecha, número de operación ficticio y estado. |
 | RF-25 | Opciones para imprimir y guardar la constancia. |
 | RF-26 | Terminología tributaria correcta: «Nuevo Régimen Único Simplificado (Nuevo RUS)» en toda la aplicación, sin confundirlo con el RER. |
-| RF-27 | Contribuyente ficticio precargado en un módulo único (`perfil.ts`): María Fernanda Quispe Huamán, DNI 00000000 y RUC 00000000000 deliberadamente no válidos, sin validación contra SUNAT. |
-| RF-28 | Cabecera con panel «Bienvenida, María Fernanda Quispe Huamán» y opción «Perfil de demostración» que muestra el nombre, el DNI y el RUC ficticios. |
+| RF-27 | Contribuyente ficticio precargado en un módulo único (`perfil.ts`): Pepe Lucho Pérez, DNI 00000000 y RUC 00000000000 deliberadamente no válidos, sin validación contra SUNAT. |
+| RF-28 | Cabecera con panel «Bienvenida, Pepe Lucho Pérez» y opción «Perfil de demostración» que muestra el nombre, el DNI y el RUC ficticios. |
 | RF-29 | Notificaciones accesibles y cerrables: «Cargando datos, espere un momento...» al elegir el período, «Sr. Contribuyente, el formulario se agregó a la Bandeja de Presentación/Pagos» al agregar, ventana «Usted añadió un formulario a la bandeja de pagos. Para continuar seleccione:» con «Volver al formulario» / «Ir a Presentar/Pagar», confirmación Sí/No y mensajes diferenciados del pago (aprobado, rechazado, cancelado). |
 | RF-30 | Contador discreto «Bandeja (0)» / «Bandeja (1)» en la cabecera. |
 | RF-31 | Prevención de duplicados accidentales de un mismo período tributario en la bandeja. |

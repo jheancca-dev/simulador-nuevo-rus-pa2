@@ -10,7 +10,7 @@
  * consulta ni valida datos contra SUNAT ni contra ningún servicio externo.
  */
 
-/** Datos del contribuyente de demostración. */
+/** Datos del contribuyente ficticio de pruebas. */
 export interface PerfilContribuyente {
   /** Nombre completo del contribuyente ficticio. */
   nombre: string
@@ -20,17 +20,17 @@ export interface PerfilContribuyente {
   ruc: string
   /** Régimen tributario simulado. */
   regimen: string
-  /** Etiqueta del tipo de cuenta académica. */
+  /** Etiqueta del tipo de usuario académico. */
   tipoCuenta: string
 }
 
 /** Contribuyente académico precargado, compartido por toda la aplicación. */
 export const PERFIL_DEMOSTRACION: PerfilContribuyente = {
-  nombre: 'María Fernanda Quispe Huamán',
+  nombre: 'Pepe Lucho Pérez',
   dni: '00000000',
   ruc: '00000000000',
   regimen: 'Nuevo RUS',
-  tipoCuenta: 'Contribuyente de demostración',
+  tipoCuenta: 'Contribuyente ficticio de pruebas',
 }
 
 /** Nota permanente sobre el carácter ficticio de los datos de prueba. */

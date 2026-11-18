@@ -44,7 +44,7 @@ const FILAS_PERFIL: FilaPerfil[] = [
   { etiqueta: 'DNI de demostración', valor: PERFIL_DEMOSTRACION.dni },
   { etiqueta: 'RUC de demostración', valor: PERFIL_DEMOSTRACION.ruc },
   { etiqueta: 'Régimen', valor: PERFIL_DEMOSTRACION.regimen },
-  { etiqueta: 'Tipo de cuenta', valor: PERFIL_DEMOSTRACION.tipoCuenta },
+  { etiqueta: 'Tipo de usuario', valor: PERFIL_DEMOSTRACION.tipoCuenta },
 ]
 
 export function Cabecera({ cantidadBandeja }: CabeceraProps) {
